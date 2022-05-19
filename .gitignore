@@ -1,0 +1,5 @@
+# ignore env
+visual_env/
+
+# ignore pychache
+__pychache__/
