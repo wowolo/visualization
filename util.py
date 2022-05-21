@@ -1,3 +1,5 @@
+import numpy as np
+
 def dict_extract(key, kwargs, default=None):
     
     if key in kwargs.keys():
