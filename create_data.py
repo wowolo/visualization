@@ -56,8 +56,8 @@ class CreateData():
             self.x_min = [self.x_min for i in range(d_in)]
 
         self.x_max = util.dict_extract(kwargs, 'x_max', 1)
-        if isinstance(self.x_min, int):
-            self.x_min = [self.x_min for i in range(d_in)]
+        if isinstance(self.x_max, int):
+            self.x_max = [self.x_max for i in range(d_in)]
 
         self.n_samples = util.dict_extract(kwargs, 'n_samples', 64)
 
@@ -100,7 +100,7 @@ class CreateData():
 
         for i in range(self.d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            x_val[:, i] = self._noise_data(self.n_samples, self.x_min, self.x_max) * np.random.normal(scale=2, size=self.n_samples)
+            x_val[:, i] = self._noise_data(self.n_samples, self.x_min[i], self.x_max[i]) * np.random.normal(scale=2, size=self.n_samples)
 
         y_val = self.f_true(x_val) 
 

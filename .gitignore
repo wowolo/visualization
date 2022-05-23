@@ -2,4 +2,4 @@
 visual_env/
 
 # ignore pychache
-__pychache__/
+__pycache__/
