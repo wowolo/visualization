@@ -16,7 +16,7 @@ class CreateData():
 
     @staticmethod
     def _equi_data(n_samples, x_min_i, x_max_i):
-        return np.linspace(x_min_i,x_max_i , n_samples)
+        return np.linspace(x_min_i, x_max_i , n_samples)
 
 
 
@@ -82,7 +82,7 @@ class CreateData():
             if i == 0:
                 x_train[:, i] = self._equi_data(self.n_samples, self.x_min[i], self.x_max[i])
             
-            if i == 1:
+            elif i == 1:
                 x_train[:, i] = self._periodic_data(self.n_samples, self.x_min[i], self.x_max[i])
             
             else:
@@ -100,7 +100,7 @@ class CreateData():
 
         for i in range(self.d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            x_val[:, i] = self._noise_data(self.n_samples, self.x_min[i], self.x_max[i]) * np.random.normal(scale=2, size=self.n_samples)
+            x_val[:, i] = self._noise_data(self.n_samples, self.x_min[i], self.x_max[i]) * np.random.normal(scale=1, size=self.n_samples)
 
         y_val = self.f_true(x_val) 
 

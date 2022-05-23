@@ -1,3 +1,4 @@
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -67,11 +68,13 @@ def f(x):
 
 data = CreateData(d_in, d_out, f)
 
-# plt.plot(data.x_train, data.y_train, 'ko')
-# plt.plot(data.x_val, data.y_val, 'g.')
+# %%
 
 # #np.stack([np.sin(np.pi*x_train[:,0]) +0.0, 2.0*(x_train[:,0]>0)-1], axis=1).shape
-# data.y_train.shape
+data.y_train.shape
 
-# plt.plot(data.x_train[:,0], data.y_train[:,0], 'g.')
-# plt.plot(data.x_train[:,0], data.y_train[:,1], 'r.')
+plt.plot(data.x_val[:,0], data.y_val[:,1], 'g.')
+plt.plot(data.x_train[:,0], data.y_train[:,1], 'r.')
+# %%
+data.x_train.shape
+# %%
