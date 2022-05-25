@@ -1,6 +1,6 @@
-def report_hyperparam(key, **kwargs):
+def report_hyperparam(key, hyperparam_dict):
     print('The following hyperparameters have been used for the construkction of the {} \
         architecture:'.format(key))
-    for key in kwargs.keys():
-        print('{}: {}'.format(key, kwargs[key]))
+    for paramkey in hyperparam_dict.keys():
+        print('{}: {}'.format(paramkey, hyperparam_dict[paramkey]))
     

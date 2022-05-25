@@ -109,7 +109,6 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
     # in construction of architecture
 
     def __init__(self, key=None, **kwargs):
-        # kwargs: 'depth', 'width', 'report'
 
         super(ModelCatalogue, self).__init__()
 
@@ -131,7 +130,7 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
         hyperparam_dict = self.initialize_architecture()
         
-        if self.report: # TODO implement in a sensible way
+        if self.config_params['report']: 
             nn_util.report_hyperparam(self.config_params['key'], hyperparam_dict)
 
         # self.optimizer = torch.optim.Adam(self.neural_network.parameters()) # torch optim Adam of self.neural_network
@@ -139,10 +138,13 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
     
 
     def initialize_architecture(self):
-        if isinstance(self.key, type(None)):
+
+        key = self.config_params['key']
+
+        if isinstance(key, type(None)):
             return None
 
-        method_keyword = 'init_arch_{}'.format(self.key)
+        method_keyword = 'init_arch_{}'.format(key)
         init_method = getattr(self, method_keyword)
         
         return init_method(**self.config_params) # creates paramters of architecture
@@ -150,15 +152,18 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
 
     def forward(self, x):
-        if isinstance(self.key, type(None)):
+
+        key = self.config_params['key']
+
+        if isinstance(key, type(None)):
             return None
-        method_keyword = 'forward_{}'.format(self.key)
+        method_keyword = 'forward_{}'.format(key)
         forward_method = getattr(self, method_keyword)
 
         return forward_method(x)
 
     
-
+    # TODO define parametrized (<- kwargs) training based on x_train, y_train 
     # def train(self, y, x, **kwargs):
     #     # kwargs: 'epochs', 'learning_rate', 'reg_ord', 'reg_alpha'
     #     reg_ord = util.dict_extract(kwargs, 'reg_ord', 2)

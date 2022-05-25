@@ -26,6 +26,8 @@ class NTK_Linear(nn.Module):
 class Stack_Core(nn.Module):
 
     def __init__(self, input_width, output_width, variable_width, skip_conn, linear_skip_conn, linear_skip_conn_width):
+        super().__init__()
+        
         self.skip_conn = skip_conn
         self.linear_skip_conn = linear_skip_conn
         self.linear_skip_conn_width = linear_skip_conn_width
