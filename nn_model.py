@@ -7,6 +7,10 @@ import nn_util
 from custom_layers import Stack_Core, NTK_Linear
 
 
+
+
+
+
 class ModelMethods(nn.Module):
     # method names have to have form init_arch_{}, forward_{} (.format(key))
 
@@ -105,6 +109,12 @@ class ModelMethods(nn.Module):
 
 
 
+
+
+
+
+
+
 class ModelCatalogue(ModelMethods): # the kwargs differ depending on the architecture: implement print function giving what has been used
     # in construction of architecture
 
@@ -162,22 +172,6 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
         return forward_method(x)
 
-    
-    # TODO define parametrized (<- kwargs) training based on x_train, y_train 
-    # def train(self, y, x, **kwargs):
-    #     # kwargs: 'epochs', 'learning_rate', 'reg_ord', 'reg_alpha'
-    #     reg_ord = util.dict_extract(kwargs, 'reg_ord', 2)
-    #     if isinstance(self.key, type(None)):
-    #         return None
-
-    #     epochs = util.dict_extract(kwargs, 'epochs', 1)
-    #     for epoch in range(epochs):
-    #         # use respective forward methods
-    #         # for reg: torch.linalg.vector_norm + info of 'reg_ord', 'reg_alpha'
-
-
-
-    
 
 
    
@@ -187,11 +181,28 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
 # class ExtendedModel(ModelCatalogue):
 
-#     def __init__(self):
+#     def __init__(self, key, **kwargs):
 
-#         super(ExtendedModel, self).__init__() # pass appropriate input to create architecture
+#         super(ExtendedModel, self).__init__(key, **kwargs) # pass appropriate input to create architecture
 
+# # TODO define parametrized (<- kwargs) training based on x_train, y_train, criterion
+#     def train(self, y_train, x_train, criterion, **kwargs):
+#         # get parameters from kwargs
+#         epochs = util.dict_extract(kwargs, 'epochs', 1)
+#         learning_rate = util.dict_extract(kwargs, 'learning_rate', .001)
+#         regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
+#         regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .005)
+        
+#         if isinstance(self.config_params['key'], type(None)):
+#             return None
 
+#         for epoch in range(epochs):
+#             # use respective forward methods
+#             # for reg: torch.linalg.vector_norm + info of 'reg_ord', 'reg_alpha'
+#             output = self.forward(x_train)
+#             loss = criterion(output, y_train)
+#             for self.parameters():
+#                 # do adding
 
 #     def get_history(self): 
 
