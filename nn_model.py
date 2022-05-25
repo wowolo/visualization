@@ -1,52 +1,98 @@
 import torch
 from torch import nn
 
-class CreateArchitecture(nn.Module): # the kwargs differ depending on the architecture: implement print function giving what has been used
+import util
+import nn_util
+from custom_layers import Core_Stack, NTK_Linear
+
+class ModelCatalogue(nn.Module): # the kwargs differ depending on the architecture: implement print function giving what has been used
     # in construction of architecture
 
-    def __init__(self, key, d_in, d_out, **kwargs):
+    def __init__(self, key=None, **kwargs):
 
-        super(CreateArchitecture, self).__init__()
+        super(ModelCatalogue, self).__init__()
 
-        self.initialize_architecture(key)
+        self.key = key
+        self.d_in = util.dict_extract(kwargs, 'd_in', 1)
+        self.d_out = util.dict_extract(kwargs, 'd_out', 1)
 
-        self.optimizer = torch.optim.Adam(self.neural_network.parameters()) # torch optim Adam of self.neural_network
+        self.init_arch_dict = {
+            'NTK': self.init_arch_NTK,
+            'Stack': self.init_arch_Stack
+        }
+        self.forward_dict = {
+            'NTK': self.forward_NTK,
+            'Stack': self.forward_Stack
+        }
+        self.train_dict = {
+            'NTK': self.train_NTK,
+            'Stack': self.train_Stack
+        }
+
+        self.initialize_architecture(**kwargs)
+
+        # self.optimizer = torch.optim.Adam(self.neural_network.parameters()) # torch optim Adam of self.neural_network
 
     
 
-    def initialize_architecture(self, key, **kwargs):
+    def initialize_architecture(self, **kwargs):
+        if isinstance(self.key, type(None)):
+            return None
+        # kwargs: 'depth', 'width', 'l2reg'
 
-        architecture_dict = {
-            'NTK': self.create_model_NTK,
-            'Stack': self.create_model_stack}
-
-        architecture_dict[key](**kwargs)
-
-        return neural_network
+        self.init_arch_dict[self.key](**kwargs) # creates paramters of architecture
 
 
-    def create_model_NTK(self, **kwargs):
+
+    def forward(self, x):
+        if isinstance(self.key, type(None)):
+            return None
+        # manage by dictionary
+        return self.forward_dict[self.key](x)
+
+    
+
+    def train(self):
+        if isinstance(self.key, type(None)):
+            return None
+        self.train_dict[self.key]()
+
+
+    ########## NTK methods ##########
+
+    def init_arch_NTK(self, **kwargs):
+
         # self initialization of weights 
+        depth = util.dict_extract(kwargs, 'depth', 2)
+        width = util.dict_extract(kwargs, 'width', 124)
+        report = util.dict_extract(kwargs, 'report', True)
+
+        module
+
+        for i in range(depth):
+            if i == 0:
+
+        
+        if report:
+            nn_util.report_hyperparam(self.key, ) # input all the hyperparameters that have been used
 
 
     
-    def create_model_stack(self, **kwargs):
+    def forward_NTK(self, x):
+
+    ########## Stack methods ##########
+
+    def init_arch_Stack(self, **kwargs):
         # self initialization of weights 
+    
 
 
-    def _core_stack(self, input_width, output_width, variable_width):
+   
 
-        stack = nn.Sequential(
-            nn.Linear(input_width, variable_width),
-            nn.ReLU(),
-            nn.Linear(variable_width, output_width)
-            )
-
-        return stack
 
     
 
-class NNModel(CreateArchitecture):
+class NNModel(ModelCatalogue):
 
     def __init__(self):
 

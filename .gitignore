@@ -1,5 +1,6 @@
 # ignore env
 visual_env/
 
-# ignore pychache
+# ignore pychache, ipynb
 __pycache__/
+.ipynb_checkpoints/
