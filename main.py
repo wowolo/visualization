@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from create_data import CreateData
+from nn_model import ExtendedModel
 
 
 n_samples = 64
@@ -75,6 +76,13 @@ data.y_train.shape
 
 plt.plot(data.x_val[:,0], data.y_val[:,1], 'g.')
 plt.plot(data.x_train[:,0], data.y_train[:,1], 'r.')
-# %%
 data.x_train.shape
+
+# %%
+nn_model = ExtendedModel('NTK')
+
+
+# %%
+criterion = torch.nn.MSELoss()
+nn_model.train(data.x_train, data.y_train, criterion)
 # %%

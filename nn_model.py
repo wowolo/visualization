@@ -1,6 +1,7 @@
 from tkinter import Y
 import torch
 from torch import nn
+import torch.optim as optim
 
 import util
 import nn_util
@@ -179,30 +180,51 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
     
 
-# class ExtendedModel(ModelCatalogue):
+class ExtendedModel(ModelCatalogue):
 
-#     def __init__(self, key, **kwargs):
+    def __init__(self, key, **kwargs):
 
-#         super(ExtendedModel, self).__init__(key, **kwargs) # pass appropriate input to create architecture
+        super(ExtendedModel, self).__init__(key, **kwargs) # pass appropriate input to create architecture
 
-# # TODO define parametrized (<- kwargs) training based on x_train, y_train, criterion
-#     def train(self, y_train, x_train, criterion, **kwargs):
-#         # get parameters from kwargs
-#         epochs = util.dict_extract(kwargs, 'epochs', 1)
-#         learning_rate = util.dict_extract(kwargs, 'learning_rate', .001)
-#         regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
-#         regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .005)
+
+# TODO implement tracking object to get history
+    def train(self, x_train, y_train, criterion, **kwargs):
+
+        if isinstance(self.config_params['key'], type(None)):
+            return None
+
+        # get parameters from kwargs
+        epochs = util.dict_extract(kwargs, 'epochs', 1)
+        learning_rate = util.dict_extract(kwargs, 'learning_rate', .001)
+        update_rule = util.dict_extract(kwargs, 'optimizer', optim.SGD)
+        regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
+        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .005)
         
-#         if isinstance(self.config_params['key'], type(None)):
-#             return None
+        # prepare torch objects needed in training loop
+        optimizer = update_rule(self.parameters(), lr=learning_rate)
+        training_generator = nn_util.DataGenerator(x_train, y_train, **kwargs)
 
-#         for epoch in range(epochs):
-#             # use respective forward methods
-#             # for reg: torch.linalg.vector_norm + info of 'reg_ord', 'reg_alpha'
-#             output = self.forward(x_train)
-#             loss = criterion(output, y_train)
-#             for self.parameters():
-#                 # do adding
+        for epoch in range(epochs):
+
+            print('Epoch: ', epoch)
+
+            for X, y in training_generator:
+
+                output = self.forward(X)
+                loss = criterion(output, y)
+
+                # add regularization terms to loss
+                reg = torch.tensor(0., requires_grad=True)
+
+                for param in self.parameters():
+                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=regularization_ord)
+                
+                loss = loss + regularization_alpha * reg
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
 
 #     def get_history(self): 
 
