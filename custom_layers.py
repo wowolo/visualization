@@ -23,12 +23,12 @@ class NTK_Linear(nn.Module):
 
 
 
-class Core_Stack(nn.Module):
+class Stack_Core(nn.Module):
 
-    def __init__(self, input_width, output_width, variable_width, **kwargs):
-        self.skip_conn = util.dict_extract(kwargs, 'skip_conn', False)
-        self.linear_skip_conn = util.dict_extract(kwargs, 'lin_skip_conn', False)
-        self.linear_skip_conn_width = util.dict_extract(kwargs, 'linear_skip_conn_width', int(0.2*variable_width))
+    def __init__(self, input_width, output_width, variable_width, skip_conn, linear_skip_conn, linear_skip_conn_width):
+        self.skip_conn = skip_conn
+        self.linear_skip_conn = linear_skip_conn
+        self.linear_skip_conn_width = linear_skip_conn_width
 
         self.linear_1 = nn.Linear(input_width, variable_width)
 
@@ -38,7 +38,7 @@ class Core_Stack(nn.Module):
         if self.linear_skip_conn:
             self.linear_skip = nn.Linear(input_width, self.linear_skip_conn_width)
             hidden_input_width += self.linear_skip_conn_width
-            
+
         self.linear_2 = nn.Linear(hidden_input_width, output_width)
 
     
