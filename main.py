@@ -7,16 +7,16 @@ from create_data import CreateData
 from nn_model import ExtendedModel
 
 
-n_samples = 200000
+n_samples = 256
 noise_scale = .1
 x_min = -1
 x_max = 1
-n_val = 256
+n_val = 128
 np.random.seed(seed=24)
 
 
 # config 1
-d_in = 2
+d_in = 8
 d_out = 32
 def f(x):
     return np.array([
@@ -82,17 +82,22 @@ data.y_train.shape
 data.x_train.shape
 
 # %%
-nn_model = ExtendedModel('Stack', d_in=d_in, d_out=d_out, depth=4, width=2058, bottleneck_width=22, variable_width=2058,
-    linear_skip_conn=False, skip_conn=False)
+nn_model = ExtendedModel('Stack', d_in=d_in, d_out=d_out, depth=2, width=1024, bottleneck_width=128, variable_width=8003,
+    linear_skip_conn=False, skip_conn=True)
 
 
 # %%
 
 criterion = torch.nn.MSELoss()
-nn_model.train(data.x_train, data.y_train, criterion, epochs=3, batch_size=64, 
-    regularization_alpha=0.005, update_rule=torch.optim.Adam, learning_rate=0.001, shuffle=True)
+nn_model.train(data.x_train, data.y_train, criterion, epochs=1024, batch_size=128, 
+    regularization_alpha=0.05, update_rule=torch.optim.Adam, learning_rate=0.0001, shuffle=True)
 # %%
-targ_func = 1
-plt.plot(data.x_train[:,0], data.y_train[:,targ_func], 'g.')
-plt.plot(data.x_train[:,0], nn_model.forward(data.x_train).detach()[:,targ_func], 'r.')
+plt.plot(data.x_train[:,1], data.y_train[:,0], 'g.')
+plt.plot(data.x_train[:,1], nn_model.forward(data.x_train).detach()[:,0], 'r.')
+plt.show()
+
+for targ_func in range(1, 32):
+    plt.plot(data.x_train[:,0], data.y_train[:,targ_func], 'g.')
+    plt.plot(data.x_train[:,0], nn_model.forward(data.x_train).detach()[:,targ_func], 'r.')
+    plt.show()
 # %%
