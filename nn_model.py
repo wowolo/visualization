@@ -2,6 +2,8 @@ from tkinter import Y
 import torch
 from torch import nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
+
 
 import util
 import nn_util
@@ -28,16 +30,20 @@ class ModelMethods(nn.Module):
         hyperparam_dict = {key: kwargs[key] for key in hyperparam}
 
         mod_list = []
+        depth = hyperparam_dict['depth']
 
-        for i in range(hyperparam_dict['depth']):
-            if i == 0:
-                mod_list.append(NTK_Linear(hyperparam_dict['d_in'], hyperparam_dict['width']))
-            elif i < hyperparam_dict['depth'] - 1:
-                mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['width']))
+        for i in range(depth):
+            if depth == 1:
+                mod_list.append(NTK_Linear(hyperparam_dict['d_in'], hyperparam_dict['d_out']))
             else:
-                mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['d_out']))
+                if i == 0:
+                    mod_list.append(NTK_Linear(hyperparam_dict['d_in'], hyperparam_dict['width']))
+                elif i < depth - 1:
+                    mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['width']))
+                else:
+                    mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['d_out']))
 
-        self.layers = nn.ModuleList(mod_list)
+        self.layers = nn.ModuleList(mod_list).double()
 
         return hyperparam_dict
 
@@ -45,10 +51,12 @@ class ModelMethods(nn.Module):
     
     def forward_NTK(self, x):
 
-        for layer in self.layers:
-            y = layer(x)
+        for layer in self.layers[:-1]:
+            x = nn.ReLU()(layer(x))
         
-        return y
+        x = self.layers[-1](x)
+        
+        return x
 
 
 
@@ -61,40 +69,52 @@ class ModelMethods(nn.Module):
         hyperparam_dict = {key: kwargs[key] for key in hyperparam}
 
         mod_list = []
+        depth = hyperparam_dict['depth']
 
-        for i in range(hyperparam_dict['depth']):
-            if i == 0:
+        for i in range(depth):
+            if depth == 1:
                 mod_list.append(Stack_Core(
-                        hyperparam_dict['d_in'], 
-                        hyperparam_dict['bottleneck_width'],
-                        hyperparam_dict['variable_width'],
-                        hyperparam_dict['skip_conn'],
-                        hyperparam_dict['linear_skip_conn'],
-                        hyperparam_dict['linear_skip_conn_width']
+                            hyperparam_dict['d_in'], 
+                            hyperparam_dict['d_out'],
+                            hyperparam_dict['variable_width'],
+                            hyperparam_dict['skip_conn'],
+                            hyperparam_dict['linear_skip_conn'],
+                            hyperparam_dict['linear_skip_conn_width']
+                        )
                     )
-                )
-            elif i < hyperparam_dict['depth'] - 1:
-                mod_list.append(Stack_Core(
-                        hyperparam_dict['bottleneck_width'], 
-                        hyperparam_dict['bottleneck_width'],
-                        hyperparam_dict['variable_width'],
-                        hyperparam_dict['skip_conn'],
-                        hyperparam_dict['linear_skip_conn'],
-                        hyperparam_dict['linear_skip_conn_width']
-                    )
-                )
             else:
-                mod_list.append(Stack_Core(
-                        hyperparam_dict['bottleneck_width'], 
-                        hyperparam_dict['d_out'],
-                        hyperparam_dict['variable_width'],
-                        hyperparam_dict['skip_conn'],
-                        hyperparam_dict['linear_skip_conn'],
-                        hyperparam_dict['linear_skip_conn_width']
+                if i == 0:
+                    mod_list.append(Stack_Core(
+                            hyperparam_dict['d_in'], 
+                            hyperparam_dict['bottleneck_width'],
+                            hyperparam_dict['variable_width'],
+                            hyperparam_dict['skip_conn'],
+                            hyperparam_dict['linear_skip_conn'],
+                            hyperparam_dict['linear_skip_conn_width']
+                        )
                     )
-                )
+                elif i < depth - 1:
+                    mod_list.append(Stack_Core(
+                            hyperparam_dict['bottleneck_width'], 
+                            hyperparam_dict['bottleneck_width'],
+                            hyperparam_dict['variable_width'],
+                            hyperparam_dict['skip_conn'],
+                            hyperparam_dict['linear_skip_conn'],
+                            hyperparam_dict['linear_skip_conn_width']
+                        )
+                    )
+                else:
+                    mod_list.append(Stack_Core(
+                            hyperparam_dict['bottleneck_width'], 
+                            hyperparam_dict['d_out'],
+                            hyperparam_dict['variable_width'],
+                            hyperparam_dict['skip_conn'],
+                            hyperparam_dict['linear_skip_conn'],
+                            hyperparam_dict['linear_skip_conn_width']
+                        )
+                    )
 
-        self.layers = nn.ModuleList(mod_list)
+        self.layers = nn.ModuleList(mod_list).double()
 
         return hyperparam_dict
     
@@ -102,10 +122,12 @@ class ModelMethods(nn.Module):
 
     def forward_Stack(self, x):
 
-        for layer in self.layers:
-            y = layer(x)
+        for layer in self.layers[:-1]:
+            x = nn.ReLU()(layer(x))
         
-        return y
+        x = self.layers[-1](x)
+        
+        return x
 
 
 
@@ -136,7 +158,7 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
         self.config_params['variable_width'] = util.dict_extract(kwargs, 'variable_width', 24)
         self.config_params['skip_conn'] = util.dict_extract(kwargs, 'skip_conn', False)
         self.config_params['linear_skip_conn'] = util.dict_extract(kwargs, 'linear_skip_conn', False)
-        self.config_params['linear_skip_conn_width'] = util.dict_extract(kwargs, 'linear_skip_conn_width', 1)
+        self.config_params['linear_skip_conn_width'] = util.dict_extract(kwargs, 'linear_skip_conn_width', int(self.config_params['variable_width']*.3))
         self.config_params['report'] = util.dict_extract(kwargs, 'report', True)
 
         hyperparam_dict = self.initialize_architecture()
@@ -195,10 +217,10 @@ class ExtendedModel(ModelCatalogue):
 
         # get parameters from kwargs
         epochs = util.dict_extract(kwargs, 'epochs', 1)
-        learning_rate = util.dict_extract(kwargs, 'learning_rate', .001)
+        learning_rate = util.dict_extract(kwargs, 'learning_rate', .01)
         update_rule = util.dict_extract(kwargs, 'optimizer', optim.SGD)
         regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
-        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .005)
+        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .000005)
         
         # prepare torch objects needed in training loop
         optimizer = update_rule(self.parameters(), lr=learning_rate)
@@ -212,19 +234,20 @@ class ExtendedModel(ModelCatalogue):
 
                 output = self.forward(X)
                 loss = criterion(output, y)
+                print('Loss without reg: {}'.format(loss))
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
 
                 for param in self.parameters():
-                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=regularization_ord)
+                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=regularization_ord)**2
                 
                 loss = loss + regularization_alpha * reg
+                print('Loss with reg: {}'.format(loss))
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-
 
 #     def get_history(self): 
 

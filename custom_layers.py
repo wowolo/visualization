@@ -54,7 +54,7 @@ class Stack_Core(nn.Module):
 
         if self.linear_skip_conn:
             linear_input = self.linear_skip(x)
-            hidden_input = torch.cat((hidden_input, linear_input))
+            hidden_input = torch.cat((hidden_input, linear_input), 1)
 
         y = self.linear_2(hidden_input)
 

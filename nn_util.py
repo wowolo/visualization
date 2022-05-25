@@ -1,10 +1,11 @@
+import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 def report_hyperparam(key, hyperparam_dict):
 
-    print('The following hyperparameters have been used for the construkction of the {} \
+    print('The following hyperparameters have been used for the construction of the {} \
         architecture:'.format(key))
-        
+
     for paramkey in hyperparam_dict.keys():
         print('{}: {}'.format(paramkey, hyperparam_dict[paramkey]))
     
@@ -12,10 +13,11 @@ def report_hyperparam(key, hyperparam_dict):
 
 def DataGenerator(x_train, y_train, **kwargs):
 
-    tensor_x = torch.Tensor(x_train).double()
-    tensor_y = torch.Tensor(y_train).double()
+    dataset = TensorDataset(x_train, y_train)
 
-    dataset = TensorDataset(tensor_x, tensor_y)
-    data_generator =  DataLoader(dataset, **kwargs)
+    allowed_keys = list(set(['batch_size', 'shuffle']).intersection(kwargs.keys()))
+    dataloader_dict = {key: kwargs[key] for key in allowed_keys}
+
+    data_generator =  DataLoader(dataset, **dataloader_dict)
 
     return data_generator

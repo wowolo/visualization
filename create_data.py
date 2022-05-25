@@ -90,7 +90,7 @@ class CreateData():
 
         y_train = self.f_true(x_train) + np.random.normal(scale=1, size=(self.n_samples, self.d_out)) * self.noise_scale
 
-        return y_train, x_train
+        return util.to_tensor(y_train), util.to_tensor(x_train)
 
 
 
@@ -104,7 +104,7 @@ class CreateData():
 
         y_val = self.f_true(x_val) 
 
-        return y_val, x_val
+        return util.to_tensor(y_val), util.to_tensor(x_val)
 
     
 

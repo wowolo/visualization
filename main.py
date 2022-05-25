@@ -1,13 +1,14 @@
 # %%
 import numpy as np
+import torch
 import matplotlib.pyplot as plt
 
 from create_data import CreateData
 from nn_model import ExtendedModel
 
 
-n_samples = 64
-noise_scale = .5
+n_samples = 200000
+noise_scale = .1
 x_min = -1
 x_max = 1
 n_val = 256
@@ -55,34 +56,43 @@ def f(x):
         -100 * np.sign(x[:,0]) * x[:,0]**2
     ]).T
 
-# config 2
+# # config 2
 # d_in = 1
 # d_out = 1
 # def f(x):
-#     return np.sin(np.pi*x[:,0])
+#     return np.array([
+#         np.sin(np.pi*x[:,0])
+#     ]).T
 
-# config 3
+# # config 3
 # d_in = 1
 # d_out = 2
 # def f(x):
 #     return np.stack([x[:,0]**2 -0.5, 2.0*(x[:,0]<0.3)*(x[:,0]-0.3)+1], axis=1)
 
-data = CreateData(d_in, d_out, f)
+data = CreateData(d_in, d_out, f, n_samples=n_samples, x_min=x_min, x_max=x_max)
 
 # %%
 
 # #np.stack([np.sin(np.pi*x_train[:,0]) +0.0, 2.0*(x_train[:,0]>0)-1], axis=1).shape
 data.y_train.shape
 
-plt.plot(data.x_val[:,0], data.y_val[:,1], 'g.')
-plt.plot(data.x_train[:,0], data.y_train[:,1], 'r.')
+# plt.plot(data.x_val[:,0], data.y_val[:,0], 'g.')
+# plt.plot(data.x_train[:,0], data.y_train[:,0], 'r.')
 data.x_train.shape
 
 # %%
-nn_model = ExtendedModel('NTK')
+nn_model = ExtendedModel('Stack', d_in=d_in, d_out=d_out, depth=4, width=2058, bottleneck_width=22, variable_width=2058,
+    linear_skip_conn=False, skip_conn=False)
 
 
 # %%
+
 criterion = torch.nn.MSELoss()
-nn_model.train(data.x_train, data.y_train, criterion)
+nn_model.train(data.x_train, data.y_train, criterion, epochs=3, batch_size=64, 
+    regularization_alpha=0.005, update_rule=torch.optim.Adam, learning_rate=0.001, shuffle=True)
+# %%
+targ_func = 1
+plt.plot(data.x_train[:,0], data.y_train[:,targ_func], 'g.')
+plt.plot(data.x_train[:,0], nn_model.forward(data.x_train).detach()[:,targ_func], 'r.')
 # %%
