@@ -113,24 +113,11 @@ np.random.seed(seed=24)
 
 # create data and model
 data = CreateData(
-    config['d_in'], 
-    config['d_out'], 
-    config['f_true'], 
-    n_samples=config['n_samples'], 
-    x_min=config['x_min'], 
-    x_max=config['x_max']
+    **config
 )
 
 nn_model = ExtendedModel(
-    config['architecture_key'], 
-    d_in=config['d_in'], 
-    d_out=config['d_out'], 
-    depth=config['depth'], 
-    width=config['width'], 
-    bottleneck_width=config['bottleneck_width'], 
-    variable_width=config['variable_width'],
-    linear_skip_conn=config['linear_skip_conn'], 
-    skip_conn=config['skip_conn']
+    **config
 )
 
 # set all involved tensors to device gpu/cpu
@@ -145,13 +132,7 @@ nn_model.to(device)
 nn_model.train(
     x_train, 
     y_train, 
-    config['criterion'], 
-    shuffle=config['shuffle'],
-    epochs=config['epochs'], 
-    batch_size=config['batch_size'], 
-    regularization_alpha=config['regularization_alpha'], 
-    update_rule=config['update_rule'], 
-    learning_rate=config['learning_rate']
+    **config
 )
 
 # evaluate the trained model by plots
@@ -163,3 +144,6 @@ for targ_func in range(1, 32):
     plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
     plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
     plt.show()
+
+# %%
+# replace the cell above by the ExperimentManager (allowing for robust documentation?!)

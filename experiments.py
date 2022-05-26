@@ -18,9 +18,9 @@ class ExperimentManager():
         
         
 
-    def conduct_exerimentbatch(self, list_of_complete_configs, experimentbatch_name):
+    def do_exerimentbatch(self, list_of_complete_configs, experimentbatch_name):
         # might want to define complete configs at some point and check for them
-        
+
         # write initial nn_model config params
         self.nn_model.save(self.root / experimentbatch_name / 'nn_model_statedict.pt')
 
@@ -32,13 +32,7 @@ class ExperimentManager():
             self.nn_model.train(
                 self.x_train, 
                 self.y_train, 
-                config['criterion'], 
-                shuffle=config['shuffle'],
-                epochs=config['epochs'], 
-                batch_size=config['batch_size'], 
-                regularization_alpha=config['regularization_alpha'], 
-                update_rule=config['update_rule'], 
-                learning_rate=config['learning_rate']
+                **config
             )
 
             # document experiment at experiment_path with: config files

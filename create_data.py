@@ -43,30 +43,25 @@ class CreateData():
 
 
 
-    def __init__(self, d_in , d_out, f_true, **kwargs):
+    def __init__(self, **kwargs):
 
-        self.d_in = d_in
+        dict_extraction_strings = [
+            'd_in', 
+            'd_out', 
+            'f_true', 
+            'x_min', 
+            'x_max', 
+            'n_samples', 
+            'noise_scale',
+            'n_val',
+        ]
 
-        self.d_out = d_out
+        self.config_params = {string: kwargs[string] for string in dict_extraction_strings}
 
-        self.f_true = f_true
-
-        self.x_min = util.dict_extract(kwargs, 'x_min', -1)
-        if isinstance(self.x_min, int):
-            self.x_min = [self.x_min for i in range(d_in)]
-
-        self.x_max = util.dict_extract(kwargs, 'x_max', 1)
-        if isinstance(self.x_max, int):
-            self.x_max = [self.x_max for i in range(d_in)]
-
-        self.n_samples = util.dict_extract(kwargs, 'n_samples', 64)
-
-        self.noise_scale = util.dict_extract(kwargs, 'noise_scale', .5)
-
-        self.n_val = util.dict_extract(kwargs, 'n_val', 256)
-
-        self.resolution = util.dict_extract(kwargs, 'resolution', 540)
-
+        if isinstance(self.config_params['x_min'], int):
+            self.config_params['x_min'] = [self.config_params['x_min'] for i in range(self.config_params['d_in'])]
+        if isinstance(self.config_params['x_max'], int):
+            self.config_params['x_max'] = [self.config_params['x_max'] for i in range(self.config_params['d_in'])]
 
         # create training and valuation data
         self.y_train, self.x_train = self.create_training_data()
@@ -76,33 +71,41 @@ class CreateData():
 
     def create_training_data(self):
         
-        x_train = np.empty((self.n_samples, self.d_in))
+        n_samples = self.config_params['n_samples']
+        x_min = self.config_params['x_min']
+        x_max = self.config_params['x_max']
 
-        for i in range(self.d_in):
+        x_train = np.empty((n_samples, self.config_params['d_in']))
+
+        for i in range(self.config_params['d_in']):
             if i == 0:
-                x_train[:, i] = self._equi_data(self.n_samples, self.x_min[i], self.x_max[i])
+                x_train[:, i] = self._equi_data(n_samples, x_min[i], x_max[i])
             
             elif i == 1:
-                x_train[:, i] = self._periodic_data(self.n_samples, self.x_min[i], self.x_max[i])
+                x_train[:, i] = self._periodic_data(n_samples, x_min[i], x_max[i])
             
             else:
-                x_train[:, i] = self._noise_data(self.n_samples, self.x_min[i], self.x_max[i])
+                x_train[:, i] = self._noise_data(n_samples, x_min[i], x_max[i])
 
-        y_train = self.f_true(x_train) + np.random.normal(scale=1, size=(self.n_samples, self.d_out)) * self.noise_scale
+        y_train = self.config_params['f_true'](x_train) + np.random.normal(scale=1, size=(n_samples, self.config_params['d_out'])) * self.config_params['noise_scale']
 
         return util.to_tensor(y_train), util.to_tensor(x_train)
 
 
 
     def create_valuation_data(self):
+        n_samples = self.config_params['n_samples']
+        x_min = self.config_params['x_min']
+        x_max = self.config_params['x_max']
+        d_in = self.config_params['d_in']
 
-        x_val = np.empty((self.n_samples, self.d_in))
+        x_val = np.empty((n_samples, d_in))
 
-        for i in range(self.d_in):
+        for i in range(d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            x_val[:, i] = self._noise_data(self.n_samples, self.x_min[i], self.x_max[i]) * np.random.normal(scale=1, size=self.n_samples)
+            x_val[:, i] = self._noise_data(n_samples, x_min[i], x_max[i]) * np.random.normal(scale=1, size=n_samples)
 
-        y_val = self.f_true(x_val) 
+        y_val = self.config_params['f_true'](x_val) 
 
         return util.to_tensor(y_val), util.to_tensor(x_val)
 

@@ -149,31 +149,34 @@ class ModelCatalogue(ModelMethods):
         super(ModelCatalogue, self).__init__()
 
         # parameter input by user
-        # self.config_params = kwargs
-        self.config_params['architecture_key'] = util.dict_extract(kwargs, 'architecture_key', None)
+        dict_extraction_strings = [
+            'architecture_key',
+            'd_in', 
+            'd_out', 
+            'width', 
+            'depth', 
+            'bottleneck_width', 
+            'variable_width', 
+            'skip_conn',
+            'linear_skip_conn',
+            'linear_skip_conn_width'
+        ]
 
-        # adding default parameters if not given at initialization
-        self.config_params['d_in'] = util.dict_extract(kwargs, 'd_in', 1)
-        self.config_params['d_out'] = util.dict_extract(kwargs, 'd_out', 1)
-        self.config_params['width'] = util.dict_extract(kwargs, 'width', 15)
-        self.config_params['depth'] = util.dict_extract(kwargs, 'depth', 1)
-        self.config_params['bottleneck_width'] = util.dict_extract(kwargs, 'bottleneck_width', 8)
-        self.config_params['variable_width'] = util.dict_extract(kwargs, 'variable_width', 24)
-        self.config_params['skip_conn'] = util.dict_extract(kwargs, 'skip_conn', False)
-        self.config_params['linear_skip_conn'] = util.dict_extract(kwargs, 'linear_skip_conn', False)
-        self.config_params['linear_skip_conn_width'] = util.dict_extract(kwargs, 'linear_skip_conn_width', int(self.config_params['variable_width']*.3))
-        self.config_params['report'] = util.dict_extract(kwargs, 'report', True)
+        self.architecture_config = {string: kwargs[string] for string in dict_extraction_strings}        
+        self.architecture_config['report'] = util.dict_extract(kwargs, 'report', True)
+
+        self.training_config = {}
 
         hyperparam_dict = self.initialize_architecture()
         
-        if self.config_params['report']: 
-            nn_util.report_hyperparam(self.config_params['architecture_key'], hyperparam_dict)
+        if self.architecture_config['report']: 
+            nn_util.report_hyperparam(self.architecture_config['architecture_key'], hyperparam_dict)
 
     
 
     def initialize_architecture(self):
 
-        key = self.config_params['architecture_key']
+        key = self.architecture_config['architecture_key']
 
         if isinstance(key, type(None)):
             return None
@@ -181,16 +184,17 @@ class ModelCatalogue(ModelMethods):
         method_keyword = 'init_arch_{}'.format(key)
         init_method = getattr(self, method_keyword)
         
-        return init_method(**self.config_params) # creates paramters of architecture
+        return init_method(**self.architecture_config) # creates paramters of architecture
 
 
 
     def forward(self, x):
 
-        key = self.config_params['architecture_key']
+        key = self.architecture_config['architecture_key']
 
         if isinstance(key, type(None)):
             return None
+
         method_keyword = 'forward_{}'.format(key)
         forward_method = getattr(self, method_keyword)
 
@@ -205,29 +209,36 @@ class ModelCatalogue(ModelMethods):
 
 class ExtendedModel(ModelCatalogue):
 
-    def __init__(self, key, **kwargs):
+    def __init__(self, **kwargs):
 
-        super(ExtendedModel, self).__init__(key, **kwargs) # pass appropriate input to create architecture
+        super(ExtendedModel, self).__init__(**kwargs) # pass appropriate input to create architecture
 
         self.loss = []
         self.loss_wout_reg = []
 
 
 # TODO implement tracking object to get history
-    def train(self, x_train, y_train, criterion, **kwargs):
+    def train(self, x_train, y_train, **kwargs):
 
-        if isinstance(self.config_params['architecture_key'], type(None)):
+        if isinstance(self.architecture_config['architecture_key'], type(None)):
             return None
 
         # get parameters from kwargs
-        epochs = util.dict_extract(kwargs, 'epochs', 1)
-        learning_rate = util.dict_extract(kwargs, 'learning_rate', .0005)
-        update_rule = util.dict_extract(kwargs, 'optimizer', optim.SGD)
-        regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
-        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .0005)
+        dict_extraction_strings = [
+            'criterion',
+            'epochs', 
+            'learning_rate', 
+            'optimizer', 
+            'regularization_ord', 
+            'regularization_alpha'
+        ]
+
+        self.training_config = {string: kwargs[string] for string in dict_extraction_strings} 
+
+        epochs = self.training_config['epochs']    
         
         # prepare torch objects needed in training loop
-        optimizer = update_rule(self.parameters(), lr=learning_rate)
+        optimizer = self.training_config['update_rule'](self.parameters(), lr=self.training_config['learning_rate'])
         training_generator = nn_util.DataGenerator(x_train, y_train, **kwargs)
 
         self.loss_wout_reg = np.empty(epochs * training_generator.__len__())
@@ -241,16 +252,16 @@ class ExtendedModel(ModelCatalogue):
             for X, y in training_generator:
 
                 output = self.forward(X)
-                loss = criterion(output, y)
+                loss = self.training_config['criterion'](output, y)
                 self.loss_wout_reg[ind_loss] = loss
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
 
                 for param in self.parameters():
-                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=regularization_ord)**2
+                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.training_config['regularization_ord'])**2
                 
-                loss = loss + regularization_alpha * reg
+                loss = loss + self.training_config['regularization_alpha'] * reg
                 self.loss[ind_loss] = loss
 
                 optimizer.zero_grad()
