@@ -1,4 +1,4 @@
-from tkinter import Y
+import numpy as np
 import torch
 from torch import nn
 import torch.optim as optim
@@ -12,9 +12,8 @@ from custom_layers import Stack_Core, NTK_Linear
 
 
 
-
-
 class ModelMethods(nn.Module):
+    # parameters/layers all have to be contained in self.layers attribute
     # method names have to have form init_arch_{}, forward_{} (.format(key))
 
     def __init__(self):
@@ -131,6 +130,11 @@ class ModelMethods(nn.Module):
 
 
 
+    ########## Generic class methods ##########
+
+    def reset_parameters(self):
+        for layer in self.layers:
+            layer.reset_parameters()
 
 
 
@@ -138,16 +142,15 @@ class ModelMethods(nn.Module):
 
 
 
-class ModelCatalogue(ModelMethods): # the kwargs differ depending on the architecture: implement print function giving what has been used
-    # in construction of architecture
+class ModelCatalogue(ModelMethods): 
 
-    def __init__(self, key=None, **kwargs):
+    def __init__(self, **kwargs):
 
         super(ModelCatalogue, self).__init__()
 
         # parameter input by user
-        self.config_params = kwargs
-        self.config_params['key'] = key
+        # self.config_params = kwargs
+        self.config_params['architecture_key'] = util.dict_extract(kwargs, 'architecture_key', None)
 
         # adding default parameters if not given at initialization
         self.config_params['d_in'] = util.dict_extract(kwargs, 'd_in', 1)
@@ -164,15 +167,13 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
         hyperparam_dict = self.initialize_architecture()
         
         if self.config_params['report']: 
-            nn_util.report_hyperparam(self.config_params['key'], hyperparam_dict)
-
-        # self.optimizer = torch.optim.Adam(self.neural_network.parameters()) # torch optim Adam of self.neural_network
+            nn_util.report_hyperparam(self.config_params['architecture_key'], hyperparam_dict)
 
     
 
     def initialize_architecture(self):
 
-        key = self.config_params['key']
+        key = self.config_params['architecture_key']
 
         if isinstance(key, type(None)):
             return None
@@ -186,7 +187,7 @@ class ModelCatalogue(ModelMethods): # the kwargs differ depending on the archite
 
     def forward(self, x):
 
-        key = self.config_params['key']
+        key = self.config_params['architecture_key']
 
         if isinstance(key, type(None)):
             return None
@@ -208,23 +209,30 @@ class ExtendedModel(ModelCatalogue):
 
         super(ExtendedModel, self).__init__(key, **kwargs) # pass appropriate input to create architecture
 
+        self.loss = []
+        self.loss_wout_reg = []
+
 
 # TODO implement tracking object to get history
     def train(self, x_train, y_train, criterion, **kwargs):
 
-        if isinstance(self.config_params['key'], type(None)):
+        if isinstance(self.config_params['architecture_key'], type(None)):
             return None
 
         # get parameters from kwargs
         epochs = util.dict_extract(kwargs, 'epochs', 1)
-        learning_rate = util.dict_extract(kwargs, 'learning_rate', .01)
+        learning_rate = util.dict_extract(kwargs, 'learning_rate', .0005)
         update_rule = util.dict_extract(kwargs, 'optimizer', optim.SGD)
         regularization_ord = util.dict_extract(kwargs, 'regularization_ord', 2)
-        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .000005)
+        regularization_alpha = util.dict_extract(kwargs, 'regularization_alpha', .0005)
         
         # prepare torch objects needed in training loop
         optimizer = update_rule(self.parameters(), lr=learning_rate)
         training_generator = nn_util.DataGenerator(x_train, y_train, **kwargs)
+
+        self.loss_wout_reg = np.empty(epochs * training_generator.__len__())
+        self.loss = np.empty_like(self.loss_wout_reg)
+        ind_loss = 0
 
         for epoch in range(epochs):
 
@@ -234,7 +242,7 @@ class ExtendedModel(ModelCatalogue):
 
                 output = self.forward(X)
                 loss = criterion(output, y)
-                print('Loss without reg: {}'.format(loss))
+                self.loss_wout_reg[ind_loss] = loss
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
@@ -243,15 +251,29 @@ class ExtendedModel(ModelCatalogue):
                     reg = reg + torch.linalg.vector_norm(param.flatten(), ord=regularization_ord)**2
                 
                 loss = loss + regularization_alpha * reg
-                print('Loss with reg: {}'.format(loss))
+                self.loss[ind_loss] = loss
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-#     def get_history(self): 
+                ind_loss += 1
 
 
 
-#     def plot(self):
-#         # use functions from plot functions script
+    def plot1d(self, x, y, plot_xdim, plot_ydim):
+        # use functions from plot functions script
+        plt.plot(x[:,plot_xdim], y[:,plot_ydim], 'g.')
+        plt.plot(x[:,plot_xdim], self.forward(x).detach()[:,plot_ydim], 'r.')
+        plt.show()
+
+
+    
+    def save(self, path):
+        torch.save(self.state_dict(), path)
+    
+
+
+    def load(self, path):
+        self.load_state_dict(torch.load(path))
+        self.eval()

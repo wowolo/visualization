@@ -4,3 +4,6 @@ visual_env/
 # ignore pychache, ipynb
 __pycache__/
 .ipynb_checkpoints/
+
+# ignore html files
+*.html

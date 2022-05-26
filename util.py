@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import torch
 
@@ -12,3 +13,11 @@ def dict_extract(kwargs, key, default=None):
 
 def to_tensor(x):
     return torch.Tensor(x).double()
+
+
+def make_jsonable(x):
+    try:
+        json.dumps(x)
+        return x
+    except:
+        return str(x)
