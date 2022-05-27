@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from create_data import CreateData
 from nn_model import ExtendedModel
+from experiments import ExperimentManager
 
 
 
@@ -94,6 +95,7 @@ config = {
     'bottleneck_width': 128, # for Stack
     'variable_width': 8192, # for Stack
     'linear_skip_conn': False, # for Stack
+    'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
     # training parameters
     'criterion': torch.nn.MSELoss(),
@@ -101,8 +103,9 @@ config = {
     'epochs': 1024,
     'batch_size': 128,
     'regularization_alpha': 0.05,
-    'update_rule': torch.optim.Adam, 
+    'regularization_ord': 2,
     'learning_rate': 0.0001,
+    'update_rule': torch.optim.Adam, 
 }
 # add function specific parameters based on the configurations above
 config.update(config_0)
@@ -125,25 +128,39 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send a
 
 x_train = data.x_train.to(device)
 y_train = data.y_train.to(device)
+x_val = data.x_val # .to(device)
+y_val = data.y_val # .to(device)
 nn_model.to(device)
 
 # %%
-# train the model on the given data
-nn_model.train(
-    x_train, 
-    y_train, 
-    **config
-)
+# # train the model on the given data
+# nn_model.train(
+#     x_train, 
+#     y_train, 
+#     **config
+# )
 
-# evaluate the trained model by plots
-plt.plot(data.x_val[:,1], data.y_val[:,0], 'g.')
-plt.plot(data.x_val[:,1], nn_model.forward(data.x_val).detach()[:,0], 'r.')
-plt.show()
+# # evaluate the trained model by plots
+# plt.plot(data.x_val[:,1], data.y_val[:,0], 'g.')
+# plt.plot(data.x_val[:,1], nn_model.forward(data.x_val).detach()[:,0], 'r.')
+# plt.show()
 
-for targ_func in range(1, 32):
-    plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
-    plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
-    plt.show()
+# for targ_func in range(1, 32):
+#     plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
+#     plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
+#     plt.show()
 
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
+data_dict = {
+    'x_train': x_train,
+    'y_train': y_train,
+    'x_val': x_val,
+    'y_val': y_val
+}
+config_ = config
+config_['epochs'] = 5
+config_['epochs'] = 1
+manager = ExperimentManager(nn_model, data_dict)
+manager.do_exerimentbatch([config, config_], 'test_experiment')
+# %%

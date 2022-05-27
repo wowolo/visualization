@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import json
 
@@ -22,7 +23,18 @@ class ExperimentManager():
         # might want to define complete configs at some point and check for them
 
         # write initial nn_model config params
-        self.nn_model.save(self.root / experimentbatch_name / 'nn_model_statedict.pt')
+        experimentbatch_path = self.root / experimentbatch_name
+        i = 0
+        while True:
+            try:
+                os.mkdir(experimentbatch_path)
+                break
+            except FileExistsError:
+                experimentbatch_path = self.root / (experimentbatch_name + '_{}'.format(i))
+                i += 1
+                continue
+
+        self.nn_model.save(experimentbatch_path / 'initial_nn_model_statedict.pt')
 
         experiment_index_dict = {'experiment_{}'.format(i): None for i in range(len(list_of_complete_configs))}
 
@@ -37,7 +49,9 @@ class ExperimentManager():
 
             # document experiment at experiment_path with: config files
             exp_ind = 'experiment_{}'.format(i)
-            experiment_path = self.root / experimentbatch_name / exp_ind
+            experiment_path = experimentbatch_path / exp_ind
+            os.mkdir(experiment_path)
+            
 
             # create add to index and write in experiment directory general config
             json_config = {key: util.make_jsonable(config[key]) for key in config.keys()}
@@ -45,12 +59,16 @@ class ExperimentManager():
             with open(experiment_path / 'general_experiment_config.txt', 'w') as file:
                 file.write(json.dumps(json_config))
 
-            # wite nn_model.config_params (partially updated after training)
-            with open(experiment_path / 'nn_config_params.txt', 'w') as file:
-                file.write(json.dumps(self.nn_model.config_params))
+            # wite nn_model.config_architecture &  nn_model.config_training (partially updated after training)
+            with open(experiment_path / 'nn_config_architecture.txt', 'w') as file:
+                json_config_architecture = {key: util.make_jsonable(self.nn_model.config_architecture[key]) for key in self.nn_model.config_architecture.keys()}
+                file.write(json.dumps(json_config_architecture))
+            with open(experiment_path / 'nn_config_training.txt', 'w') as file:
+                json_config_training = {key: util.make_jsonable(self.nn_model.config_training[key]) for key in self.nn_model.config_training.keys()}
+                file.write(json.dumps(json_config_training))
             
             self.nn_model.save(experiment_path / 'nn_model_statedict.pt')
 
         # document experiment index file for whole batch
-        with open(self.root / experimentbatch_name / 'experiment_index.txt', 'w') as file:
+        with open(experimentbatch_path / 'experiment_index.txt', 'w') as file:
             file.write(json.dumps(experiment_index_dict))

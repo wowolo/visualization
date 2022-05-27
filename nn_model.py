@@ -135,6 +135,7 @@ class ModelMethods(nn.Module):
     def reset_parameters(self):
         for layer in self.layers:
             layer.reset_parameters()
+        self.double()
 
 
 
@@ -162,21 +163,22 @@ class ModelCatalogue(ModelMethods):
             'linear_skip_conn_width'
         ]
 
-        self.architecture_config = {string: kwargs[string] for string in dict_extraction_strings}        
-        self.architecture_config['report'] = util.dict_extract(kwargs, 'report', True)
+        self.config_architecture = {string: kwargs[string] for string in dict_extraction_strings}        
+        self.config_architecture['report'] = util.dict_extract(kwargs, 'report', True)
 
-        self.training_config = {}
+        self.config_training = {}
 
         hyperparam_dict = self.initialize_architecture()
+        self.double()
         
-        if self.architecture_config['report']: 
-            nn_util.report_hyperparam(self.architecture_config['architecture_key'], hyperparam_dict)
+        if self.config_architecture['report']: 
+            nn_util.report_hyperparam(self.config_architecture['architecture_key'], hyperparam_dict)
 
     
 
     def initialize_architecture(self):
 
-        key = self.architecture_config['architecture_key']
+        key = self.config_architecture['architecture_key']
 
         if isinstance(key, type(None)):
             return None
@@ -184,13 +186,13 @@ class ModelCatalogue(ModelMethods):
         method_keyword = 'init_arch_{}'.format(key)
         init_method = getattr(self, method_keyword)
         
-        return init_method(**self.architecture_config) # creates paramters of architecture
+        return init_method(**self.config_architecture) # creates paramters of architecture
 
 
 
     def forward(self, x):
 
-        key = self.architecture_config['architecture_key']
+        key = self.config_architecture['architecture_key']
 
         if isinstance(key, type(None)):
             return None
@@ -220,26 +222,28 @@ class ExtendedModel(ModelCatalogue):
 # TODO implement tracking object to get history
     def train(self, x_train, y_train, **kwargs):
 
-        if isinstance(self.architecture_config['architecture_key'], type(None)):
+        if isinstance(self.config_architecture['architecture_key'], type(None)):
             return None
 
         # get parameters from kwargs
         dict_extraction_strings = [
             'criterion',
-            'epochs', 
-            'learning_rate', 
-            'optimizer', 
+            'shuffle',
+            'epochs',
+            'batch_size',
+            'regularization_alpha',
             'regularization_ord', 
-            'regularization_alpha'
+            'learning_rate', 
+            'update_rule'
         ]
 
-        self.training_config = {string: kwargs[string] for string in dict_extraction_strings} 
+        self.config_training = {string: kwargs[string] for string in dict_extraction_strings} 
 
-        epochs = self.training_config['epochs']    
+        epochs = self.config_training['epochs']    
         
         # prepare torch objects needed in training loop
-        optimizer = self.training_config['update_rule'](self.parameters(), lr=self.training_config['learning_rate'])
-        training_generator = nn_util.DataGenerator(x_train, y_train, **kwargs)
+        optimizer = self.config_training['update_rule'](self.parameters(), lr=self.config_training['learning_rate'])
+        training_generator = nn_util.DataGenerator(x_train, y_train, **self.config_training)
 
         self.loss_wout_reg = np.empty(epochs * training_generator.__len__())
         self.loss = np.empty_like(self.loss_wout_reg)
@@ -252,16 +256,16 @@ class ExtendedModel(ModelCatalogue):
             for X, y in training_generator:
 
                 output = self.forward(X)
-                loss = self.training_config['criterion'](output, y)
+                loss = self.config_training['criterion'](output, y)
                 self.loss_wout_reg[ind_loss] = loss
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
 
                 for param in self.parameters():
-                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.training_config['regularization_ord'])**2
+                    reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
                 
-                loss = loss + self.training_config['regularization_alpha'] * reg
+                loss = loss + self.config_training['regularization_alpha'] * reg
                 self.loss[ind_loss] = loss
 
                 optimizer.zero_grad()

@@ -7,3 +7,6 @@ __pycache__/
 
 # ignore html files
 *.html
+
+# any experiment_data
+experiment_*
