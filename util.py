@@ -21,3 +21,22 @@ def make_jsonable(x):
         return x
     except:
         return str(x)
+
+
+def dict_to_file(dict, file_path, format='v'):
+    # format: 'v' or 'h'
+    with open(file_path, 'w') as file:
+        if format == 'v':
+            for key, val in dict.items():
+                file.write('{}: {}\n'.format(key, val))
+        else:
+            json_dict = {key: make_jsonable(dict[key]) for key in dict.keys()}
+            file.write(json.dumps(json_dict))
+
+
+def dictvals_to_list(dict):
+    for key, val in dict.items():
+        if not(isinstance(val, list)):
+            dict[key] = [val] 
+
+    return dict

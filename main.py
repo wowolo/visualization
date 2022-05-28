@@ -63,7 +63,7 @@ def f_2(x):
 
 
 config_0 = {
-    'd_in': 8, # >= 2
+    'd_in': [2, 8, 24], # >= 2
     'd_out': 32,
     'f_true': f_0
 }
@@ -80,64 +80,82 @@ config_2 = {
     'f_true': f_2
 }
 
-# config file
-config = {
+# configs file
+configs = {
     # data parameters
-    'n_samples': 256,
+    'n_samples': [256],
     'noise_scale': .1,
     'x_min': -1,
     'x_max': 1,
     'n_val': 128,
     # architecture parameters
-    'architecture_key': 'Stack', # 'NTK'
-    'depth': 2,
-    'width': 1024,
-    'bottleneck_width': 128, # for Stack
-    'variable_width': 8192, # for Stack
+    'architecture_key': ['Stack', 'NTK'],
+    'depth': 1, #[1, 2, 6],
+    'width': 16, #[16, 64, 256, 512, 2048, 8192],
+    'bottleneck_width': 16, #[16, 256, 512], # for Stack
+    'variable_width': 16, #[16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': 1024,
-    'batch_size': 128,
-    'regularization_alpha': 0.05,
+    'epochs': [1, 5], # [256, 1024],
+    'batch_size': 64, #[64, 256],
+    'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
-    'learning_rate': 0.0001,
+    'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
 }
 # add function specific parameters based on the configurations above
-config.update(config_0)
+configs.update(config_0)
 
-np.random.seed(seed=24)
 
 # %%
+np.random.seed(seed=24)
+manager = ExperimentManager(ExtendedModel, CreateData)
+config_list = manager.create_config_list(configs)
+manager.do_exerimentbatch(config_list, 'test_experiments')
 
-# create data and model
-data = CreateData(
-    **config
-)
+# # create data and model
+# data = CreateData(
+#     **configs
+# )
 
-nn_model = ExtendedModel(
-    **config
-)
+# nn_model = ExtendedModel(
+#     **configs
+# )
 
-# set all involved tensors to device gpu/cpu
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+# # set all involved tensors to device gpu/cpu
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-x_train = data.x_train.to(device)
-y_train = data.y_train.to(device)
-x_val = data.x_val # .to(device)
-y_val = data.y_val # .to(device)
-nn_model.to(device)
+# x_train = data.x_train.to(device)
+# y_train = data.y_train.to(device)
+# x_val = data.x_val # .to(device)
+# y_val = data.y_val # .to(device)
+# nn_model.to(device)
+
+
+# %%
+# replace the cell above by the ExperimentManager (allowing for robust documentation?!)
+# data_dict = {
+#     'x_train': x_train,
+#     'y_train': y_train,
+#     'x_val': x_val,
+#     'y_val': y_val
+# }
+# config_ = configs
+# config_['epochs'] = 5
+# config_['epochs'] = 1
+# manager = ExperimentManager(nn_model, data_dict)
+# manager.do_exerimentbatch([configs, config_], 'test_experiment')
 
 # %%
 # # train the model on the given data
 # nn_model.train(
 #     x_train, 
 #     y_train, 
-#     **config
+#     **configs
 # )
 
 # # evaluate the trained model by plots
@@ -149,18 +167,3 @@ nn_model.to(device)
 #     plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
 #     plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
 #     plt.show()
-
-# %%
-# replace the cell above by the ExperimentManager (allowing for robust documentation?!)
-data_dict = {
-    'x_train': x_train,
-    'y_train': y_train,
-    'x_val': x_val,
-    'y_val': y_val
-}
-config_ = config
-config_['epochs'] = 5
-config_['epochs'] = 1
-manager = ExperimentManager(nn_model, data_dict)
-manager.do_exerimentbatch([config, config_], 'test_experiment')
-# %%

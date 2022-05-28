@@ -245,8 +245,8 @@ class ExtendedModel(ModelCatalogue):
         optimizer = self.config_training['update_rule'](self.parameters(), lr=self.config_training['learning_rate'])
         training_generator = nn_util.DataGenerator(x_train, y_train, **self.config_training)
 
-        self.loss_wout_reg = np.empty(epochs * training_generator.__len__())
-        self.loss = np.empty_like(self.loss_wout_reg)
+        self.loss_wout_reg = list(np.empty(epochs * training_generator.__len__()))
+        self.loss = list(np.empty_like(self.loss_wout_reg))
         ind_loss = 0
 
         for epoch in range(epochs):
@@ -257,7 +257,7 @@ class ExtendedModel(ModelCatalogue):
 
                 output = self.forward(X)
                 loss = self.config_training['criterion'](output, y)
-                self.loss_wout_reg[ind_loss] = loss
+                self.loss_wout_reg[ind_loss] = float(loss)
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
@@ -266,7 +266,7 @@ class ExtendedModel(ModelCatalogue):
                     reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
                 
                 loss = loss + self.config_training['regularization_alpha'] * reg
-                self.loss[ind_loss] = loss
+                self.loss[ind_loss] = float(loss)
 
                 optimizer.zero_grad()
                 loss.backward()
