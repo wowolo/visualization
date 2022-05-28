@@ -90,19 +90,19 @@ configs = {
     'n_val': 128,
     # architecture parameters
     'architecture_key': ['Stack', 'NTK'],
-    'depth': 1, #[1, 2, 6],
-    'width': 16, #[16, 64, 256, 512, 2048, 8192],
-    'bottleneck_width': 16, #[16, 256, 512], # for Stack
-    'variable_width': 16, #[16, 256, 2048, 8192], # for Stack
+    'depth': [1, 2, 6],
+    'width': [16, 64, 256, 512, 2048, 8192],
+    'bottleneck_width': [16, 256, 512], # for Stack
+    'variable_width': [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': [1, 5], # [256, 1024],
-    'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.1, #[0.1, 0.01, 0],
+    'epochs': [256, 1024],
+    'batch_size': [64, 256],
+    'regularization_alpha': [0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
