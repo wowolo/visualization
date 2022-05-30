@@ -1,4 +1,5 @@
 # %%
+from datetime import date, datetime
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -115,7 +116,8 @@ configs.update(config_0)
 np.random.seed(seed=24)
 manager = ExperimentManager(ExtendedModel, CreateData)
 config_list = manager.create_config_list(configs)
-manager.do_exerimentbatch(config_list, 'test_experiments')
+timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
+manager.do_exerimentbatch(config_list, 'experiments_{}'.format(timestamp))
 
 # # create data and model
 # data = CreateData(
