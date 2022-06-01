@@ -81,14 +81,20 @@ config_2 = {
     'f_true': f_2
 }
 
+config_function = config_0
+
 # configs file
-configs = {
+configs_data = {
     # data parameters
     'n_samples': [256],
     'noise_scale': .1,
     'x_min': -1,
     'x_max': 1,
-    'n_val': 128,
+    'n_val': 128
+}
+configs_data.update(config_function)
+
+configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
     'depth': 2, #[1, 2, 6],
@@ -98,6 +104,10 @@ configs = {
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
+}
+configs_architecture.update(config_function)
+
+configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
@@ -108,14 +118,12 @@ configs = {
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
 }
-# add function specific parameters based on the configurations above
-configs.update(config_0)
 
 
 # %%
 np.random.seed(seed=24)
 manager = ExperimentManager(ExtendedModel, CreateData)
-config_list = manager.create_config_list(configs)
+config_list = manager.grid_config_lists(configs_data, configs_architecture, configs_traininig)
 timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
 manager.do_exerimentbatch(config_list, 'experiments_{}'.format(timestamp))
 # %%
@@ -135,11 +143,11 @@ manager.do_exerimentbatch(config_list, 'experiments_{}'.format(timestamp))
 # %%
 # create data and model
 data = CreateData(
-    **configs
+    **configs_data
 )
 
 nn_model = ExtendedModel(
-    **configs
+    **configs_architecture
 )
 
 # set all involved tensors to device gpu/cpu
@@ -155,7 +163,7 @@ nn_model.to(device)
 nn_model.train(
     x_train, 
     y_train, 
-    **configs
+    **configs_traininig
 )
 
 # evaluate the trained model by plots

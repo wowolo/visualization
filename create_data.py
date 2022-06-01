@@ -45,12 +45,12 @@ class CreateData():
 
     def __init__(self, **kwargs):
 
-        self.config_params = self.config_extractor(**kwargs)
+        self.config = self.init_config(**kwargs)
 
-        if isinstance(self.config_params['x_min'], int):
-            self.config_params['x_min'] = [self.config_params['x_min'] for i in range(self.config_params['d_in'])]
-        if isinstance(self.config_params['x_max'], int):
-            self.config_params['x_max'] = [self.config_params['x_max'] for i in range(self.config_params['d_in'])]
+        if isinstance(self.config['x_min'], int):
+            self.config['x_min'] = [self.config['x_min'] for i in range(self.config['d_in'])]
+        if isinstance(self.config['x_max'], int):
+            self.config['x_max'] = [self.config['x_max'] for i in range(self.config['d_in'])]
 
         # create training and valuation data
         self.y_train, self.x_train = self.create_training_data()
@@ -58,7 +58,7 @@ class CreateData():
 
 
     
-    def config_extractor(self, **kwargs):
+    def init_config(self, **kwargs):
 
         default_extraction_strings = {
             'd_in': None, 
@@ -71,7 +71,7 @@ class CreateData():
             'n_val': 128
         }
 
-        config_params = {string: None for string in default_extraction_strings}
+        config = {string: None for string in default_extraction_strings}
 
         for string in default_extraction_strings:
             
@@ -80,21 +80,21 @@ class CreateData():
             else:
                 item = default_extraction_strings[string]
             
-            config_params[string] = item
+            config[string] = item
         
-        return config_params
+        return config
 
     
 
     def create_training_data(self):
         
-        n_samples = self.config_params['n_samples']
-        x_min = self.config_params['x_min']
-        x_max = self.config_params['x_max']
+        n_samples = self.config['n_samples']
+        x_min = self.config['x_min']
+        x_max = self.config['x_max']
 
-        x_train = np.empty((n_samples, self.config_params['d_in']))
+        x_train = np.empty((n_samples, self.config['d_in']))
 
-        for i in range(self.config_params['d_in']):
+        for i in range(self.config['d_in']):
             if i == 0:
                 x_train[:, i] = self._equi_data(n_samples, x_min[i], x_max[i])
             
@@ -104,17 +104,17 @@ class CreateData():
             else:
                 x_train[:, i] = self._noise_data(n_samples, x_min[i], x_max[i])
 
-        y_train = self.config_params['f_true'](x_train) + np.random.normal(scale=1, size=(n_samples, self.config_params['d_out'])) * self.config_params['noise_scale']
+        y_train = self.config['f_true'](x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
 
         return util.to_tensor(y_train), util.to_tensor(x_train)
 
 
 
     def create_valuation_data(self):
-        n_samples = self.config_params['n_samples']
-        x_min = self.config_params['x_min']
-        x_max = self.config_params['x_max']
-        d_in = self.config_params['d_in']
+        n_samples = self.config['n_samples']
+        x_min = self.config['x_min']
+        x_max = self.config['x_max']
+        d_in = self.config['d_in']
 
         x_val = np.empty((n_samples, d_in))
 
@@ -122,7 +122,7 @@ class CreateData():
             # random evaluation points (possibly outside of [x_min, x_max])
             x_val[:, i] = self._noise_data(n_samples, x_min[i], x_max[i]) * np.random.normal(scale=1, size=n_samples)
 
-        y_val = self.config_params['f_true'](x_val) 
+        y_val = self.config['f_true'](x_val) 
 
         return util.to_tensor(y_val), util.to_tensor(x_val)
 

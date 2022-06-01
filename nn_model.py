@@ -191,6 +191,7 @@ class ModelCatalogue(ModelMethods):
     def initialize_config_architecture(self, **kwargs):
         
         key = util.dict_extract(kwargs, 'architecture_key', None)
+        config_architecture = {'architecture_key': key}
 
         if isinstance(key, type(None)):
             return None
@@ -198,7 +199,9 @@ class ModelCatalogue(ModelMethods):
         method_keyword = 'init_config_{}'.format(key)
         init_method = getattr(self, method_keyword)
         
-        return init_method(**kwargs) # creates paramters of architecture
+        config_architecture.update(init_method(**kwargs))
+        
+        return  config_architecture
 
 
 
@@ -293,14 +296,14 @@ class ExtendedModel(ModelCatalogue):
     def init_config_training(self, **kwargs):
 
         default_extraction_strings = {
-            'criterion',
-            'shuffle',
-            'epochs',
-            'batch_size',
-            'regularization_alpha',
-            'regularization_ord', 
-            'learning_rate', 
-            'update_rule'
+            'criterion': torch.nn.MSELoss(),
+            'shuffle': True,
+            'epochs': 1024, 
+            'batch_size': 64,
+            'regularization_alpha': 0.1, 
+            'regularization_ord': 2,
+            'learning_rate': 0.0001,
+            'update_rule': torch.optim.Adam, 
         }
 
         config_training = nn_util.create_config(kwargs, default_extraction_strings)
