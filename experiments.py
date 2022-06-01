@@ -97,7 +97,9 @@ class ExperimentManager():
         # based on Stack/NTK set width / bottl, var to None
 
         list_of_complete_configs = []  
+
         configs = util.dictvals_to_list(configs)
+
         grid = ParameterGrid(configs)
 
         for new_config in grid:

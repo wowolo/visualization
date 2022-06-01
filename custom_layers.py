@@ -3,13 +3,14 @@ from torch import nn
 
 class NTK_Linear(nn.Module):
 
-    def __init__(self, input_width, output_width, bias=True):
+    def __init__(self, input_width, output_width, bias=True, bias_tune=1):
         
         super().__init__()
 
         self.input_width = input_width
         self.output_width = output_width
         self.bias = bias
+        self.bias_tune = bias_tune
 
         self.initialize_parameters()
 
@@ -17,17 +18,18 @@ class NTK_Linear(nn.Module):
 
     def initialize_parameters(self):
 
-        self.A = nn.Parameter(torch.randn(self.input_width, self.output_width) / self.input_width**0.5)
+        self.A = nn.Parameter(torch.randn(self.input_width, self.output_width))
 
         if self.bias:
             self.b = nn.Parameter(torch.randn(self.output_width))
+            self.bias_tune = nn.Parameter(self.bias_tune, requires_grad=False)
         else:
             self.b = torch.zeros(self.output_width)
     
 
 
     def forward(self, x):
-        return x @ self.A + self.b
+        return x @ self.A / self.input_width**0.5 + self.b * self.bias_tune
 
     
 
