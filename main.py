@@ -111,7 +111,7 @@ configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': [5, 10], #[256, 1024],
+    'epochs': [10], #[256, 1024],
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
@@ -129,7 +129,7 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
     configs_traininig
 )
 timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
-manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
+# manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
 # data_dict = {
@@ -146,29 +146,32 @@ manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_
 
 # %%
 # create data and model
-# data = CreateData(
-#     **configs_data_list[0]
-# )
+data = CreateData(
+    **configs_data_list[0]
+)
 
-# nn_model = ExtendedModel(
-#     **configs_architecture_list[0]
-# )
+nn_model = ExtendedModel(
+    **configs_architecture_list[0]
+)
 
-# # set all involved tensors to device gpu/cpu
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+# set all involved tensors to device gpu/cpu
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-# x_train = data.x_train.to(device)
-# y_train = data.y_train.to(device)
-# x_val = data.x_val # .to(device)
-# y_val = data.y_val # .to(device)
-# nn_model.to(device)
+x_train = data.x_train.to(device)
+y_train = data.y_train.to(device)
+x_val = data.x_val # .to(device)
+y_val = data.y_val # .to(device)
+nn_model.to(device)
 
-# # train the model on the given data
-# nn_model.train(
-#     x_train, 
-#     y_train, 
-#     **configs_traininig_list[0]
-# )
+# train the model on the given data
+nn_model.train(
+    x_train, 
+    y_train, 
+    **configs_traininig_list[0]
+)
+
+nn_model.plot2d(x_train, y_train, -1 , 1, -3, 3)
+
 
 # # evaluate the trained model by plots
 # plt.plot(data.x_val[:,1], data.y_val[:,0], 'g.')

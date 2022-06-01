@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from matplotlib import ticker, colors
 import matplotlib.pyplot as plt
 
 from nn_model.model_catalogue import ModelCatalogue
@@ -9,6 +10,7 @@ import nn_model.util as nn_util
     
 
 class ExtendedModel(ModelCatalogue):
+    # adds a training and various plotting methods
 
     def __init__(self, **kwargs):
 
@@ -90,6 +92,54 @@ class ExtendedModel(ModelCatalogue):
 
 
     
+    def plot2d(self, x, y, x0_min , x0_max, x1_min, x1_max, resolution=540, markersize=32, linewidth=0.5, max_plots=8):
+        # d_in = 2, d_out = 1
+        d_in = self.config_architecture['d_in']
+        d_out = self.config_architecture['d_out']
+        
+        if d_in != 2:
+            return ValueError('Input dimension of the model has to be 2 to apply the plot2d method.')
+
+        x0, x1 = np.meshgrid(
+            np.linspace(x0_min, x0_max, resolution),
+            np.linspace(x1_min, x1_max, resolution)
+        )
+        grid = np.stack((x0, x1)).T.reshape(-1, 2)
+        grid = torch.Tensor(grid).double()
+
+        outs = self.forward(grid)
+
+        for i in range(min(max_plots, d_out)):
+
+            fig, ax = plt.subplots()
+
+            y_pred = outs.detach().numpy().T[i,:].reshape(resolution,resolution).T
+
+            tmpcolornorm = colors.Normalize(
+                vmin=float(min(np.min(y_pred), min(y[:,i]))),
+                vmax=float(max(np.max(y_pred), max(y[:,i])))
+            )
+            im = ax.contourf(
+                x0, 
+                x1, 
+                y_pred, 
+                locator=ticker.LinearLocator(numticks=20), 
+                norm=tmpcolornorm
+            )
+            ax.scatter(
+                x[:,0], 
+                x[:,1], 
+                s=markersize, 
+                c=y[:,i], 
+                norm=tmpcolornorm, 
+                edgecolors='w', 
+                linewidth=linewidth
+            )#,'ro')
+            # myax.scatter(x_train[:,0],x_train[:,1],facecolor='none',edgecolor='black')
+            fig.colorbar(im, ax=ax)
+
+    
+
     def save(self, path):
         torch.save(self.state_dict(), path)
     
@@ -98,21 +148,3 @@ class ExtendedModel(ModelCatalogue):
     def load(self, path):
         self.load_state_dict(torch.load(path))
         self.eval()
-
-
-# def modelPlot2(model,x_min=x_min,x_max=x_max,y_min=y_min,y_max=y_max,resolution=540,markersize=32,linewidth=0.5):
-#   x0, x1 = np.meshgrid(np.linspace(x_min,x_max,resolution),np.linspace(y_min,y_max,resolution))
-#   grid = np.stack((np.copy(x0),np.copy(x1)))
-#   grid = grid.T.reshape(-1,2)
-#   outs = model.predict(grid)
-#   #print(outs)
-#   for i in range(min(8,d_out)):
-#     y1 = outs.T[i,:].reshape(resolution,resolution).T
-#     myfig, myax =plt.subplots()
-#     #print(np.min(y1))
-#     tmpcolornorm=colors.Normalize(vmin=min(np.min(y1),np.min(y_train[:,i])),vmax=max(np.max(y1),np.min(y_train[:,i])))
-#     myim=myax.contourf(x0,x1,y1,locator=ticker.LinearLocator(numticks=20),norm=tmpcolornorm)
-#     myax.scatter(x_train[:,0],x_train[:,1], s=markersize, c=y_train[:,i],norm=tmpcolornorm,edgecolors='w',linewidth=linewidth)#,'ro')
-#     #myax.scatter(x_train[:,0],x_train[:,1],facecolor='none',edgecolor='black')
-#     #plt.show() 
-#     myfig.colorbar(myim,ax=myax)
