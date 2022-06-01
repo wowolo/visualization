@@ -111,7 +111,7 @@ configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': 1024, #[256, 1024],
+    'epochs': [5, 10], #[256, 1024],
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
@@ -123,9 +123,13 @@ configs_traininig = {
 # %%
 np.random.seed(seed=24)
 manager = ExperimentManager(ExtendedModel, CreateData)
-config_list = manager.grid_config_lists(configs_data, configs_architecture, configs_traininig)
+configs_data_list, configs_architecture_list, configs_traininig_list = manager.grid_config_lists(
+    configs_data, 
+    configs_architecture, 
+    configs_traininig
+)
 timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
-manager.do_exerimentbatch(config_list, 'experiments_{}'.format(timestamp))
+manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
 # data_dict = {
@@ -142,36 +146,36 @@ manager.do_exerimentbatch(config_list, 'experiments_{}'.format(timestamp))
 
 # %%
 # create data and model
-data = CreateData(
-    **configs_data
-)
+# data = CreateData(
+#     **configs_data
+# )
 
-nn_model = ExtendedModel(
-    **configs_architecture
-)
+# nn_model = ExtendedModel(
+#     **configs_architecture
+# )
 
-# set all involved tensors to device gpu/cpu
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+# # set all involved tensors to device gpu/cpu
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-x_train = data.x_train.to(device)
-y_train = data.y_train.to(device)
-x_val = data.x_val # .to(device)
-y_val = data.y_val # .to(device)
-nn_model.to(device)
+# x_train = data.x_train.to(device)
+# y_train = data.y_train.to(device)
+# x_val = data.x_val # .to(device)
+# y_val = data.y_val # .to(device)
+# nn_model.to(device)
 
-# train the model on the given data
-nn_model.train(
-    x_train, 
-    y_train, 
-    **configs_traininig
-)
+# # train the model on the given data
+# nn_model.train(
+#     x_train, 
+#     y_train, 
+#     **configs_traininig
+# )
 
-# evaluate the trained model by plots
-plt.plot(data.x_val[:,1], data.y_val[:,0], 'g.')
-plt.plot(data.x_val[:,1], nn_model.forward(data.x_val).detach()[:,0], 'r.')
-plt.show()
+# # evaluate the trained model by plots
+# plt.plot(data.x_val[:,1], data.y_val[:,0], 'g.')
+# plt.plot(data.x_val[:,1], nn_model.forward(data.x_val).detach()[:,0], 'r.')
+# plt.show()
 
-for targ_func in range(1, 32):
-    plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
-    plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
-    plt.show()
+# for targ_func in range(1, 32):
+#     plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
+#     plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
+#     plt.show()

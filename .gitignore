@@ -9,7 +9,7 @@ __pycache__/
 *.html
 
 # any experiment_data
-experiment_*
+experiments_*
 
 # ignore ?random file? - no idea what it does
 .DS_Store

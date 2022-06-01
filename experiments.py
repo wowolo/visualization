@@ -38,7 +38,7 @@ class ExperimentManager():
 
         experiment_index_dict = {'experiment_{}'.format(i): None for i in range(experiment_num)}
 
-        for i in experiment_num:
+        for i in range(experiment_num):
             config_data = configs_data_list[i]
             config_architecture = configs_architecture_list[i]
             config_training = configs_traininig_list[i]
@@ -66,7 +66,9 @@ class ExperimentManager():
             os.mkdir(experiment_path)
 
             # create add to index and write in experiment directory general config
-            config = config_data.copy().update(config_architecture).update(config_training)
+            config = config_data.copy()
+            config.update(config_architecture)
+            config.update(config_training)
             json_config = {key: util.make_jsonable(config[key]) for key in config.keys()}
             
             experiment_index_dict['experiment_{}'.format(i)] = json_config
@@ -104,16 +106,19 @@ class ExperimentManager():
 
         config_list_data, config_list_architecture, config_list_training = [], [], []
         configs = configs_data.copy()
-        configs.update(configs_architecture).update(configs_traininig)
+        configs.update(configs_architecture)
+        configs.update(configs_traininig)
 
         configs = util.dictvals_to_list(configs)
 
         grid = ParameterGrid(configs)
 
         for new_config in grid:
-
-            config_list_data.append(new_config[configs_data.keys()]) 
-            config_list_architecture.append(new_config[configs_architecture.keys()])
-            config_list_training.append(new_config[configs_traininig.keys()]) 
+            temp_dict = {key: new_config[key] for key in configs_data.keys()}
+            config_list_data.append(temp_dict) 
+            temp_dict = {key: new_config[key] for key in configs_architecture.keys()}
+            config_list_architecture.append(temp_dict)
+            temp_dict = {key: new_config[key] for key in configs_traininig.keys()}
+            config_list_training.append(temp_dict) 
         
         return config_list_data, config_list_architecture, config_list_training

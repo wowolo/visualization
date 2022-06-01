@@ -176,14 +176,14 @@ class ModelCatalogue(ModelMethods):
         super(ModelCatalogue, self).__init__()
 
         self.config_architecture = self.initialize_config_architecture(**kwargs)        
-        self.config_architecture['report'] = util.dict_extract(kwargs, 'report', True)
+        report = util.dict_extract(kwargs, 'report', True)
 
         self.config_training = {}
 
         self.initialize_architecture()
         self.double()
         
-        if self.config_architecture['report']: 
+        if report: 
             nn_util.report_config(self.config_architecture)
 
 
