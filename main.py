@@ -1,8 +1,8 @@
 # %%
-from datetime import date, datetime
+from datetime import datetime
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from create_data import CreateData
 from nn_model import ExtendedModel
@@ -147,11 +147,11 @@ manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_
 # %%
 # create data and model
 # data = CreateData(
-#     **configs_data
+#     **configs_data_list[0]
 # )
 
 # nn_model = ExtendedModel(
-#     **configs_architecture
+#     **configs_architecture_list[0]
 # )
 
 # # set all involved tensors to device gpu/cpu
@@ -167,7 +167,7 @@ manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_
 # nn_model.train(
 #     x_train, 
 #     y_train, 
-#     **configs_traininig
+#     **configs_traininig_list[0]
 # )
 
 # # evaluate the trained model by plots
