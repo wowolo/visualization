@@ -45,18 +45,7 @@ class CreateData():
 
     def __init__(self, **kwargs):
 
-        dict_extraction_strings = [
-            'd_in', 
-            'd_out', 
-            'f_true', 
-            'x_min', 
-            'x_max', 
-            'n_samples', 
-            'noise_scale',
-            'n_val',
-        ]
-
-        self.config_params = {string: kwargs[string] for string in dict_extraction_strings}
+        self.config_params = self.config_extractor(**kwargs)
 
         if isinstance(self.config_params['x_min'], int):
             self.config_params['x_min'] = [self.config_params['x_min'] for i in range(self.config_params['d_in'])]
@@ -66,6 +55,34 @@ class CreateData():
         # create training and valuation data
         self.y_train, self.x_train = self.create_training_data()
         self.y_val, self.x_val = self.create_valuation_data()
+
+
+    
+    def config_extractor(self, **kwargs):
+
+        default_extraction_strings = {
+            'd_in': None, 
+            'd_out': None, 
+            'f_true': None, 
+            'x_min': -1, 
+            'x_max': 1, 
+            'n_samples': 256, 
+            'noise_scale': .1,
+            'n_val': 128
+        }
+
+        config_params = {string: None for string in default_extraction_strings}
+
+        for string in default_extraction_strings:
+            
+            if string in kwargs.keys():
+                item = kwargs[string]
+            else:
+                item = default_extraction_strings[string]
+            
+            config_params[string] = item
+        
+        return config_params
 
     
 

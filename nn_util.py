@@ -3,13 +3,13 @@ from torch.utils.data import TensorDataset, DataLoader
 
 
 
-def report_hyperparam(key, hyperparam_dict):
+def report_config(config):
 
-    print('The following hyperparameters have been used for the construction of the {} \
-        architecture:'.format(key))
+    print('The following configuration has been used for the construction of the {} \
+        architecture:'.format(config['architecture_key']))
 
-    for paramkey in hyperparam_dict.keys():
-        print('{}: {}'.format(paramkey, hyperparam_dict[paramkey]))
+    for paramkey in config.keys():
+        print('{}: {}'.format(paramkey, config[paramkey]))
     
 
 
@@ -23,3 +23,19 @@ def DataGenerator(x_train, y_train, **kwargs):
     data_generator =  DataLoader(dataset, **dataloader_dict)
 
     return data_generator
+
+
+def create_config(kwargs, default_extraction_strings):
+
+    config_architecture = {string: None for string in default_extraction_strings}
+
+    for string in default_extraction_strings:
+        
+        if string in kwargs.keys():
+            item = kwargs[string]
+        else:
+            item = default_extraction_strings[string]
+        
+        config_architecture[string] = item
+    
+    return config_architecture

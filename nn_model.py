@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 from torch import nn
-import torch.optim as optim
 import matplotlib.pyplot as plt
 
 
@@ -23,28 +22,41 @@ class ModelMethods(nn.Module):
 
     ########## NTK methods ##########
 
-    def init_arch_NTK(self, **kwargs):
+    def init_config_NTK(self, **kwargs):
         # extract necessary hyperparameters
-        hyperparam = ['d_in', 'd_out', 'width', 'depth']
-        hyperparam_dict = {key: kwargs[key] for key in hyperparam}
+        default_extraction_strings = {
+            'd_in': None, 
+            'd_out': None, 
+            'width': 64, 
+            'depth': 3, 
+        }
+        
+        config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
+        
+        return config_architecture
 
+
+
+    def init_arch_NTK(self, **config_architecture):
+        # extract necessary hyperparameters
         mod_list = []
-        depth = hyperparam_dict['depth']
+        d_in = config_architecture['d_in']
+        d_out = config_architecture['d_out']
+        depth = config_architecture['depth']
+        width = config_architecture['width']
 
         for i in range(depth):
             if depth == 1:
-                mod_list.append(NTK_Linear(hyperparam_dict['d_in'], hyperparam_dict['d_out']))
+                mod_list.append(NTK_Linear(d_in, d_out))
             else:
                 if i == 0:
-                    mod_list.append(NTK_Linear(hyperparam_dict['d_in'], hyperparam_dict['width']))
+                    mod_list.append(NTK_Linear(d_in, width))
                 elif i < depth - 1:
-                    mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['width']))
+                    mod_list.append(NTK_Linear(width, width))
                 else:
-                    mod_list.append(NTK_Linear(hyperparam_dict['width'], hyperparam_dict['d_out']))
+                    mod_list.append(NTK_Linear(width, d_out))
 
         self.layers = nn.ModuleList(mod_list).double()
-
-        return hyperparam_dict
 
 
     
@@ -61,61 +73,75 @@ class ModelMethods(nn.Module):
 
     ########## Stack methods ##########
 
-    def init_arch_Stack(self, **kwargs):
+    def init_config_Stack(self, **kwargs):
         # extract necessary hyperparameters
-        hyperparam = ['d_in', 'd_out', 'bottleneck_width', 'variable_width', 'depth', 'skip_conn', 
-            'linear_skip_conn', 'linear_skip_conn_width']
-        hyperparam_dict = {key: kwargs[key] for key in hyperparam}
+        default_extraction_strings = {
+            'd_in': None, 
+            'd_out': None, 
+            'bottleneck_width': 64, 
+            'variable_width': 128, 
+            'depth': 1, 
+            'skip_conn': False, 
+            'linear_skip_conn': False,
+            'linear_skip_conn_width': 32
+        }
+        
+        config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
+        
+        return config_architecture
+
+
+
+    def init_arch_Stack(self, **config_architecture):
+        # extract necessary hyperparameters
 
         mod_list = []
-        depth = hyperparam_dict['depth']
+        depth = config_architecture['depth']
 
         for i in range(depth):
             if depth == 1:
                 mod_list.append(Stack_Core(
-                            hyperparam_dict['d_in'], 
-                            hyperparam_dict['d_out'],
-                            hyperparam_dict['variable_width'],
-                            hyperparam_dict['skip_conn'],
-                            hyperparam_dict['linear_skip_conn'],
-                            hyperparam_dict['linear_skip_conn_width']
+                            config_architecture['d_in'], 
+                            config_architecture['d_out'],
+                            config_architecture['variable_width'],
+                            config_architecture['skip_conn'],
+                            config_architecture['linear_skip_conn'],
+                            config_architecture['linear_skip_conn_width']
                         )
                     )
             else:
                 if i == 0:
                     mod_list.append(Stack_Core(
-                            hyperparam_dict['d_in'], 
-                            hyperparam_dict['bottleneck_width'],
-                            hyperparam_dict['variable_width'],
-                            hyperparam_dict['skip_conn'],
-                            hyperparam_dict['linear_skip_conn'],
-                            hyperparam_dict['linear_skip_conn_width']
+                            config_architecture['d_in'], 
+                            config_architecture['bottleneck_width'],
+                            config_architecture['variable_width'],
+                            config_architecture['skip_conn'],
+                            config_architecture['linear_skip_conn'],
+                            config_architecture['linear_skip_conn_width']
                         )
                     )
                 elif i < depth - 1:
                     mod_list.append(Stack_Core(
-                            hyperparam_dict['bottleneck_width'], 
-                            hyperparam_dict['bottleneck_width'],
-                            hyperparam_dict['variable_width'],
-                            hyperparam_dict['skip_conn'],
-                            hyperparam_dict['linear_skip_conn'],
-                            hyperparam_dict['linear_skip_conn_width']
+                            config_architecture['bottleneck_width'], 
+                            config_architecture['bottleneck_width'],
+                            config_architecture['variable_width'],
+                            config_architecture['skip_conn'],
+                            config_architecture['linear_skip_conn'],
+                            config_architecture['linear_skip_conn_width']
                         )
                     )
                 else:
                     mod_list.append(Stack_Core(
-                            hyperparam_dict['bottleneck_width'], 
-                            hyperparam_dict['d_out'],
-                            hyperparam_dict['variable_width'],
-                            hyperparam_dict['skip_conn'],
-                            hyperparam_dict['linear_skip_conn'],
-                            hyperparam_dict['linear_skip_conn_width']
+                            config_architecture['bottleneck_width'], 
+                            config_architecture['d_out'],
+                            config_architecture['variable_width'],
+                            config_architecture['skip_conn'],
+                            config_architecture['linear_skip_conn'],
+                            config_architecture['linear_skip_conn_width']
                         )
                     )
 
         self.layers = nn.ModuleList(mod_list).double()
-
-        return hyperparam_dict
     
 
 
@@ -149,32 +175,32 @@ class ModelCatalogue(ModelMethods):
 
         super(ModelCatalogue, self).__init__()
 
-        # parameter input by user
-        dict_extraction_strings = [
-            'architecture_key',
-            'd_in', 
-            'd_out', 
-            'width', 
-            'depth', 
-            'bottleneck_width', 
-            'variable_width', 
-            'skip_conn',
-            'linear_skip_conn',
-            'linear_skip_conn_width'
-        ]
-
-        self.config_architecture = {string: kwargs[string] for string in dict_extraction_strings}        
+        self.config_architecture = self.initialize_config_architecture(**kwargs)        
         self.config_architecture['report'] = util.dict_extract(kwargs, 'report', True)
 
         self.config_training = {}
 
-        hyperparam_dict = self.initialize_architecture()
+        self.initialize_architecture()
         self.double()
         
         if self.config_architecture['report']: 
-            nn_util.report_hyperparam(self.config_architecture['architecture_key'], hyperparam_dict)
+            nn_util.report_config(self.config_architecture)
 
-    
+
+
+    def initialize_config_architecture(self, **kwargs):
+        
+        key = util.dict_extract(kwargs, 'architecture_key', None)
+
+        if isinstance(key, type(None)):
+            return None
+
+        method_keyword = 'init_config_{}'.format(key)
+        init_method = getattr(self, method_keyword)
+        
+        return init_method(**kwargs) # creates paramters of architecture
+
+
 
     def initialize_architecture(self):
 
@@ -219,25 +245,13 @@ class ExtendedModel(ModelCatalogue):
         self.loss_wout_reg = []
 
 
-# TODO implement tracking object to get history
+
     def train(self, x_train, y_train, **kwargs):
 
         if isinstance(self.config_architecture['architecture_key'], type(None)):
             return None
 
-        # get parameters from kwargs
-        dict_extraction_strings = [
-            'criterion',
-            'shuffle',
-            'epochs',
-            'batch_size',
-            'regularization_alpha',
-            'regularization_ord', 
-            'learning_rate', 
-            'update_rule'
-        ]
-
-        self.config_training = {string: kwargs[string] for string in dict_extraction_strings} 
+        self.config_training = self.init_config_training(**kwargs)
 
         epochs = self.config_training['epochs']    
         
@@ -273,6 +287,25 @@ class ExtendedModel(ModelCatalogue):
                 optimizer.step()
 
                 ind_loss += 1
+
+
+
+    def init_config_training(self, **kwargs):
+
+        default_extraction_strings = {
+            'criterion',
+            'shuffle',
+            'epochs',
+            'batch_size',
+            'regularization_alpha',
+            'regularization_ord', 
+            'learning_rate', 
+            'update_rule'
+        }
+
+        config_training = nn_util.create_config(kwargs, default_extraction_strings)
+
+        return config_training
 
 
 
