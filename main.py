@@ -98,7 +98,7 @@ configs_data.update(config_function)
 configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
-    'depth': [1, 2], #], #,[1, 2, 6],
+    'depth': 1, #[1, 2], #], #,[1, 2, 6],
     'width': None, #[16, 64, 256, 512, 2048, 8192],
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
     'variable_width': [1024, 2048, 4096], #], #  [16, 256, 2048, 8192], # for Stack
@@ -112,13 +112,15 @@ configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': [1024, 4096], # 4096,
+    'epochs': 20, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
 }
+
+
 
 
 # %%
