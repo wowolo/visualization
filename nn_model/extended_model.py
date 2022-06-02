@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 import numpy as np
 import torch
+import gc
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.figure import Figure
 from matplotlib import ticker, colors
 import matplotlib.pyplot as plt
@@ -157,8 +160,10 @@ class ExtendedModel(ModelCatalogue):
             if save:
                 filename = Path(dirname) / 'fig_{}_2dplot.png'.format(i)
                 fig.savefig(filename)
+                plt.cla() 
                 plt.clf()
                 plt.close("all")
+                gc.collect()
 
     
 
