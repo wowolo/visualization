@@ -96,6 +96,10 @@ class ExtendedModel(ModelCatalogue):
 
     
     def plot2d(self, x, y, x0_min , x0_max, x1_min, x1_max, resolution=540, markersize=32, linewidth=0.5, max_plots=8, save=True, dirname=Path().cwd()):
+        
+        if save:
+            os.mkdir(Path(dirname))
+
         # d_in = 2, d_out = 1
         d_in = self.config_architecture['d_in']
         d_out = self.config_architecture['d_out']
@@ -119,9 +123,6 @@ class ExtendedModel(ModelCatalogue):
         file_path = Path(dirname) / 'log1.txt'
         with open(file_path, 'w') as file:
             file.write('after forward pass')
-
-        if save:
-            os.mkdir(Path(dirname))
 
         for i in range(min(max_plots, d_out)):
 
