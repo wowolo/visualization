@@ -129,7 +129,7 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
     configs_architecture, 
     configs_traininig
 )
-timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
+timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
 manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
