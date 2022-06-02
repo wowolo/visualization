@@ -157,7 +157,8 @@ class ExtendedModel(ModelCatalogue):
             if save:
                 filename = Path(dirname) / 'fig_{}_2dplot.png'.format(i)
                 fig.savefig(filename)
-                fig.clf()
+                plt.clf()
+                plt.close("all")
 
     
 
