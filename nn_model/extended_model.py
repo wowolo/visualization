@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import numpy as np
 import torch
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import ticker, colors
 import matplotlib.pyplot as plt
 
