@@ -13,9 +13,6 @@ from nn_model.model_catalogue import ModelCatalogue
 import nn_model.util as nn_util
 
 
-from memory_profiler import profile
-
-
 
 class ExtendedModel(ModelCatalogue):
     # adds a training and various plotting methods
@@ -100,7 +97,6 @@ class ExtendedModel(ModelCatalogue):
 
 
     
-    @profile
     def plot2d(self, x, y, x0_min , x0_max, x1_min, x1_max, resolution=540, markersize=32, linewidth=0.5, max_plots=8, save=True, dirname=Path().cwd()):
         
         if save:
