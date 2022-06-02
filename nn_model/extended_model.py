@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import numpy as np
 import torch
 from matplotlib import ticker, colors
@@ -92,7 +94,7 @@ class ExtendedModel(ModelCatalogue):
 
 
     
-    def plot2d(self, x, y, x0_min , x0_max, x1_min, x1_max, resolution=540, markersize=32, linewidth=0.5, max_plots=8):
+    def plot2d(self, x, y, x0_min , x0_max, x1_min, x1_max, resolution=540, markersize=32, linewidth=0.5, max_plots=8, save=True, dirname=Path().cwd()):
         # d_in = 2, d_out = 1
         d_in = self.config_architecture['d_in']
         d_out = self.config_architecture['d_out']
@@ -108,6 +110,9 @@ class ExtendedModel(ModelCatalogue):
         grid = torch.Tensor(grid).double()
 
         outs = self.forward(grid)
+
+        if save:
+            os.mkdir(Path(dirname))
 
         for i in range(min(max_plots, d_out)):
 
@@ -137,6 +142,10 @@ class ExtendedModel(ModelCatalogue):
             )#,'ro')
             # myax.scatter(x_train[:,0],x_train[:,1],facecolor='none',edgecolor='black')
             fig.colorbar(im, ax=ax)
+
+            if save:
+                filename = Path(dirname) / 'fig_{}_2dplot.png'.format(i)
+                plt.savefig(filename)
 
     
 

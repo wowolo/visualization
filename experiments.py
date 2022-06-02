@@ -18,7 +18,7 @@ class ExperimentManager():
         
         
 
-    def do_exerimentbatch(self, configs_data_list, configs_architecture_list, configs_traininig_list, experimentbatch_name):
+    def do_exerimentbatch(self, configs_data_list, configs_architecture_list, configs_traininig_list, experimentbatch_name, save_fig=True):
         experiment_num = len(configs_data_list)
 
         # might want to define complete configs at some point and check for them
@@ -93,6 +93,13 @@ class ExperimentManager():
                 file.write(json.dumps(nn_model.loss))
 
             nn_model.save(experiment_path / 'nn_model_statedict.pt')
+
+            if save_fig:
+                x0min = float(min(x_train[:,0]) - 0.3)
+                x0max = float(max(x_train[:,0]) + 0.3)
+                x1min = float(min(x_train[:,1]) - 0.3)
+                x1max = float(max(x_train[:,1]) + 0.3)
+                nn_model.plot2d(x_train, y_train, x0min, x0max, x1min, x1max, dirname=experiment_path / 'figures')
 
         # document experiment index file for whole batch
         file_path = experimentbatch_path / 'experiment_index.txt'

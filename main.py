@@ -1,4 +1,5 @@
 # %%
+from pathlib import Path
 from datetime import datetime
 import numpy as np
 import torch
@@ -97,10 +98,10 @@ configs_data.update(config_function)
 configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
-    'depth': 2, #[1, 2, 6],
+    'depth': [1, 2], #[1, 2, 6],
     'width': None, #[16, 64, 256, 512, 2048, 8192],
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
-    'variable_width': 2048, # [16, 256, 2048, 8192], # for Stack
+    'variable_width': [1024, 2048, 4096], # [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
@@ -111,7 +112,7 @@ configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': [10], #[256, 1024],
+    'epochs': [1024, 4096], #[256, 1024],
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
@@ -129,7 +130,7 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
     configs_traininig
 )
 timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
-# manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
+manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp))
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
 # data_dict = {
@@ -145,32 +146,32 @@ timestamp = datetime.now().strftime('%Hh_%d.%m.%Y')
 # manager.do_exerimentbatch([configs, config_], 'test_experiment')
 
 # %%
-# create data and model
-data = CreateData(
-    **configs_data_list[0]
-)
+# # create data and model
+# data = CreateData(
+#     **configs_data_list[0]
+# )
 
-nn_model = ExtendedModel(
-    **configs_architecture_list[0]
-)
+# nn_model = ExtendedModel(
+#     **configs_architecture_list[0]
+# )
 
-# set all involved tensors to device gpu/cpu
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+# # set all involved tensors to device gpu/cpu
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-x_train = data.x_train.to(device)
-y_train = data.y_train.to(device)
-x_val = data.x_val # .to(device)
-y_val = data.y_val # .to(device)
-nn_model.to(device)
+# x_train = data.x_train.to(device)
+# y_train = data.y_train.to(device)
+# x_val = data.x_val # .to(device)
+# y_val = data.y_val # .to(device)
+# nn_model.to(device)
 
-# train the model on the given data
-nn_model.train(
-    x_train, 
-    y_train, 
-    **configs_traininig_list[0]
-)
+# # train the model on the given data
+# nn_model.train(
+#     x_train, 
+#     y_train, 
+#     **configs_traininig_list[0]
+# )
 
-nn_model.plot2d(x_train, y_train, -1 , 1, -3, 3)
+# nn_model.plot2d(x_train, y_train, -1 , 1, -3, 3, save=True, dirname=Path().cwd() / 'figures')
 
 
 # # evaluate the trained model by plots
