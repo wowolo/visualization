@@ -25,7 +25,7 @@ echo "#######################################################"
 # ressource allocation
 max_time="02:10" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
 n_core="1" # number of core (large value implies low priority)
-memory="1924" # memory allocation (in MB) per core (large value implies low priority)
+memory="5024" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
 
 
@@ -33,14 +33,15 @@ scratch="0" # disk space (in MB) for temporary data per core
 tag="${1}"
 
 # get the log filename
-log="${tag}.txt"
+log="${tag}_out.txt"
+err="${tag}_error.txt"
 
 # load python environment specified by second input
 module load gcc/8.2.0 python_gpu/3.9.9
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
-bsub -J $tag -o $log -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py
+bsub -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py
 
 # display the current queue
 bbjobs
