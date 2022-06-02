@@ -2,8 +2,7 @@ import os
 from pathlib import Path
 import numpy as np
 import torch
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib.figure import Figure
 from matplotlib import ticker, colors
 import matplotlib.pyplot as plt
 
@@ -117,8 +116,9 @@ class ExtendedModel(ModelCatalogue):
             os.mkdir(Path(dirname))
 
         for i in range(min(max_plots, d_out)):
-
-            fig, ax = plt.subplots()
+            
+            fig = Figure()
+            ax = fig.subplots()
 
             y_pred = outs.detach().numpy().T[i,:].reshape(resolution,resolution).T
 
