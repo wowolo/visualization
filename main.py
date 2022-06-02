@@ -101,7 +101,7 @@ configs_architecture = {
     'depth': [1, 2], #[1, 2, 6],
     'width': None, #[16, 64, 256, 512, 2048, 8192],
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
-    'variable_width': [1024, 2048, 4096], # [16, 256, 2048, 8192], # for Stack
+    'variable_width': [124, 248, 496], # [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
@@ -112,7 +112,7 @@ configs_traininig = {
     # training parameters
     'criterion': torch.nn.MSELoss(),
     'shuffle': True,
-    'epochs': [1024, 4096], #[256, 1024],
+    'epochs': [1, 2], #[1024, 4096]
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
