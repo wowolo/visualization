@@ -110,13 +110,21 @@ class ExtendedModel(ModelCatalogue):
         grid = np.stack((x0, x1)).T.reshape(-1, 2)
         grid = torch.Tensor(grid).double()
 
+        file_path = Path(dirname) / 'log1.txt'
+        with open(file_path, 'w') as file:
+            file.write('before forward pass')
+
         outs = self.forward(grid)
+
+        file_path = Path(dirname) / 'log1.txt'
+        with open(file_path, 'w') as file:
+            file.write('after forward pass')
 
         if save:
             os.mkdir(Path(dirname))
 
         for i in range(min(max_plots, d_out)):
-            
+
             fig = Figure()
             ax = fig.subplots()
 

@@ -92,9 +92,12 @@ class ExperimentManager():
             with open(file_path, 'w') as file:
                 file.write(json.dumps(nn_model.loss))
 
-            nn_model.save(experiment_path / 'nn_model_statedict.pt')
+            nn_model.save(experiment_path / 'nn_model_weights.pt')
 
             if save_fig:
+                file_path = experiment_path / 'logexp.txt'
+                with open(file_path, 'w') as file:
+                    file.write('just before plotting')
                 x0min = float(min(x_train[:,0]) - 0.3)
                 x0max = float(max(x_train[:,0]) + 0.3)
                 x1min = float(min(x_train[:,1]) - 0.3)
