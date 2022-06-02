@@ -164,6 +164,9 @@ class ExtendedModel(ModelCatalogue):
                 plt.clf()
                 plt.close("all")
                 gc.collect()
+        del grid
+        del outs
+        
 
     
 
