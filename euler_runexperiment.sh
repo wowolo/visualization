@@ -25,7 +25,7 @@ echo "#######################################################"
 # ressource allocation
 max_time="03:10" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
 n_core="1" # number of core (large value implies low priority)
-memory="16384" # memory allocation (in MB) per core (large value implies low priority)
+memory="65536" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
 
 
@@ -52,3 +52,4 @@ echo "end"
 echo "#######################################################"
 
 exit 0
+

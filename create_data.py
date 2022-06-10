@@ -63,7 +63,8 @@ class CreateData():
         default_extraction_strings = {
             'd_in': None, 
             'd_out': None, 
-            'f_true': None, 
+            'f_true': None,
+            'focus_ind': 0, 
             'x_min': -1, 
             'x_max': 1, 
             'n_samples': 256, 
@@ -103,8 +104,10 @@ class CreateData():
             
             else:
                 x_train[:, i] = self._noise_data(n_samples, x_min[i], x_max[i])
-
-        y_train = self.config['f_true'](x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
+        
+        # adjust function based on given focus_ind 
+        f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+        y_train = f_true(x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
 
         return util.to_tensor(y_train), util.to_tensor(x_train)
 
@@ -122,7 +125,9 @@ class CreateData():
             # random evaluation points (possibly outside of [x_min, x_max])
             x_val[:, i] = self._noise_data(n_samples, x_min[i], x_max[i]) * np.random.normal(scale=1, size=n_samples)
 
-        y_val = self.config['f_true'](x_val) 
+        # adjust function based on given focus_ind 
+        f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+        y_val = f_true(x_val) 
 
         return util.to_tensor(y_val), util.to_tensor(x_val)
 

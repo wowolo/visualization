@@ -12,74 +12,77 @@ from experiments import ExperimentManager
 
 
 # f_true functions
-def f_0(x):
+def f_0(x, focus_ind=0):
     return np.array([
         1 * x[:,1]**2 - 0.4,
         #0.1 * x[:,1]**2,
-        0.4 * np.sign(x[:,0]) * x[:,0]**2,
-        np.exp(x[:,0]) - 1,
-        x[:,0],
-        x[:,0]**2 - 0.25,
-        x[:,0]**3,
-        -1 * np.exp(-x[:,0]) + 0.5,
-        -3 * x[:,0],
-        -3 * np.sign(x[:,0]) * x[:,0]**2,
-        -3 * x[:,0]**3
-        -0.5 * np.exp(x[:,0] - 1),
-        -3 * (x[:,0] - 1),
-        -3 * (x[:,0] - 1)**2 + 1.5,
-        -3 * (x[:,0] - 1)**3,
-        1 * np.exp(x[:,0] + 1) - 1,
-        2 * (x[:,0] + 1),
-        2 * np.sign(x[:,0]) * (x[:,0])**2,
-        2 * (x[:,0] + 1)**3,
-        0.2 * np.exp(x[:,0] + 0.5),
-        0.2 * (x[:,0] + 0.5),
-        0.2 * (x[:,0] + 0.5)**2,
-        0.2 * (x[:,0] + 0.5)**3,
-        -x[:,0]**2 + 0.5,
-        x[:,0]**2,
-        0.5 * np.sign(x[:,0]) * x[:,0]**2,
-        2 * x[:,0]**3,
-        4 * np.sign(x[:,0]) * x[:,0]**2,
-        -np.sign(x[:,0]) * x[:,0]**2,
-        8 * x[:,0],
-        256 * np.sign(x[:,0]) * x[:,0]**2,
-        1024 * x[:,0],
-        64 * x[:,0]**3,
-        -100 * np.sign(x[:,0]) * x[:,0]**2
+        0.4 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        np.exp(x[:,focus_ind]) - 1,
+        x[:,focus_ind],
+        x[:,focus_ind]**2 - 0.25,
+        x[:,focus_ind]**3,
+        -1 * np.exp(-x[:,focus_ind]) + 0.5,
+        -3 * x[:,focus_ind],
+        -3 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        -3 * x[:,focus_ind]**3
+        -0.5 * np.exp(x[:,focus_ind] - 1),
+        -3 * (x[:,focus_ind] - 1),
+        -3 * (x[:,focus_ind] - 1)**2 + 1.5,
+        -3 * (x[:,focus_ind] - 1)**3,
+        1 * np.exp(x[:,focus_ind] + 1) - 1,
+        2 * (x[:,focus_ind] + 1),
+        2 * np.sign(x[:,focus_ind]) * (x[:,focus_ind])**2,
+        2 * (x[:,focus_ind] + 1)**3,
+        0.2 * np.exp(x[:,focus_ind] + 0.5),
+        0.2 * (x[:,focus_ind] + 0.5),
+        0.2 * (x[:,focus_ind] + 0.5)**2,
+        0.2 * (x[:,focus_ind] + 0.5)**3,
+        -x[:,focus_ind]**2 + 0.5,
+        x[:,focus_ind]**2,
+        0.5 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        2 * x[:,focus_ind]**3,
+        4 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        -np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        8 * x[:,focus_ind],
+        256 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2,
+        1024 * x[:,focus_ind],
+        64 * x[:,focus_ind]**3,
+        -100 * np.sign(x[:,focus_ind]) * x[:,focus_ind]**2
     ]).T
 
 
 
-def f_1(x):
+def f_1(x, focus_ind=0):
     return np.array([
-        np.sin(np.pi*x[:,0])
+        np.sin(np.pi*x[:,focus_ind])
     ]).T
 
 
 
-def f_2(x):
-    return np.stack([x[:,0]**2 -0.5, 2.0*(x[:,0]<0.3)*(x[:,0]-0.3)+1], axis=1)
+def f_2(x, focus_ind=0):
+    return np.stack([x[:,focus_ind]**2 -0.5, 2.0*(x[:,focus_ind]<0.3)*(x[:,focus_ind]-0.3)+1], axis=1)
 
 
 
 config_0 = {
     'd_in': 2, #[2, 8, 24], # >= 2
     'd_out': 32,
-    'f_true': f_0
+    'f_true': f_0,
+    'focus_ind': 0
 }
 
 config_1 = {
     'd_in': 1,
     'd_out': 1,
-    'f_true': f_1
+    'f_true': f_1,
+    'focus_ind': 0
 }
 
 config_2 = {
     'd_in': 1, # >= 2
     'd_out': 2,
-    'f_true': f_2
+    'f_true': f_2,
+    'focus_ind': 0
 }
 
 config_function = config_0
