@@ -54,10 +54,10 @@ class ModelMethods(nn.Module):
 
 
     
-    def forward_NTK(self, x):
+    def forward_NTK(self, x, **config_architecture):
 
         for layer in self.layers[:-1]:
-            x = nn.ReLU()(layer(x))
+            x = config_architecture['hidden_layer_activation']()(layer(x))
         
         x = self.layers[-1](x)
         
@@ -77,7 +77,8 @@ class ModelMethods(nn.Module):
             'depth': 1, 
             'skip_conn': False, 
             'linear_skip_conn': False,
-            'linear_skip_conn_width': 32
+            'linear_skip_conn_width': 32,
+            'hidden_layer_activation': nn_util.linear_activation,
         }
         
         config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
@@ -139,10 +140,10 @@ class ModelMethods(nn.Module):
     
 
 
-    def forward_Stack(self, x):
+    def forward_Stack(self, x, **config_architecture):
 
         for layer in self.layers[:-1]:
-            x = nn.ReLU()(layer(x))
+            x = config_architecture['hidden_layer_activation']()(layer(x))
         
         x = self.layers[-1](x)
         
@@ -223,4 +224,4 @@ class ModelCatalogue(ModelMethods):
         method_keyword = 'forward_{}'.format(key)
         forward_method = getattr(self, method_keyword)
 
-        return forward_method(x)
+        return forward_method(x, **self.config_architecture)
