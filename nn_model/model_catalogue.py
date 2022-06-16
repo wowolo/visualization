@@ -23,6 +23,7 @@ class ModelMethods(nn.Module):
             'd_out': None, 
             'width': 64, 
             'depth': 3, 
+            'hidden_layer_activation': nn_util.linear_activation,
         }
         
         config_architecture = util.create_config(kwargs, default_extraction_strings)
@@ -78,7 +79,7 @@ class ModelMethods(nn.Module):
             'skip_conn': False, 
             'linear_skip_conn': False,
             'linear_skip_conn_width': 32,
-            'hidden_layer_activation': nn_util.linear_activation,
+            'hidden_bottleneck_activation': nn_util.linear_activation,
         }
         
         config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
@@ -143,7 +144,7 @@ class ModelMethods(nn.Module):
     def forward_Stack(self, x, **config_architecture):
 
         for layer in self.layers[:-1]:
-            x = config_architecture['hidden_layer_activation']()(layer(x))
+            x = config_architecture['hidden_bottleneck_activation']()(layer(x))
         
         x = self.layers[-1](x)
         

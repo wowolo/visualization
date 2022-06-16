@@ -1,6 +1,4 @@
 import torch
-from torch.utils.data import TensorDataset, DataLoader
-
 
 
 def report_config(config):
@@ -10,19 +8,7 @@ def report_config(config):
 
     for paramkey in config.keys():
         print('{}: {}'.format(paramkey, config[paramkey]))
-    
 
-
-def DataGenerator(x_train, y_train, **kwargs):
-
-    dataset = TensorDataset(x_train, y_train)
-
-    allowed_keys = list(set(['batch_size', 'shuffle']).intersection(kwargs.keys()))
-    dataloader_dict = {key: kwargs[key] for key in allowed_keys}
-
-    data_generator =  DataLoader(dataset, **dataloader_dict)
-
-    return data_generator
 
 
 def create_config(kwargs, default_extraction_strings):
@@ -39,6 +25,8 @@ def create_config(kwargs, default_extraction_strings):
         config_architecture[string] = item
     
     return config_architecture
+
+
 
 class linear_activation(torch.nn.Module): # currently implemented as identity
     def __init__(self) -> None:

@@ -40,3 +40,8 @@ def dictvals_to_list(dict):
             dict[key] = [val] 
 
     return dict
+
+
+# class create_loss_ratio
+# Bernoulli 0/1 - whether dimensional loss is active or inactive
+# input d_out, Bernoulli p (+ draw according to number of training steps - locally or globally?)

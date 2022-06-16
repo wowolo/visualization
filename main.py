@@ -8,6 +8,7 @@ import torch
 from create_data import CreateData
 from nn_model import ExtendedModel
 from experiments import ExperimentManager
+import util
 
 
 
@@ -62,7 +63,7 @@ def f_1(x, focus_ind=0):
 def f_2(x, focus_ind=0):
     return np.stack([x[:,focus_ind]**2 -0.5, 2.0*(x[:,focus_ind]<0.3)*(x[:,focus_ind]-0.3)+1], axis=1)
 
-
+# defer config to bash script to run code?
 
 config_0 = {
     'd_in': 2, #[2, 8, 24], # >= 2
@@ -87,6 +88,8 @@ config_2 = {
 
 config_function = config_0
 
+# loss_ratio = util.create_loss_ratio(config_function['d_out'])
+
 # configs file
 configs_data = {
     # data parameters
@@ -94,7 +97,7 @@ configs_data = {
     'noise_scale': .1,
     'x_min': -1,
     'x_max': 1,
-    'n_val': 128
+    'n_val': 128,
 }
 configs_data.update(config_function)
 
@@ -108,13 +111,14 @@ configs_architecture = {
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
-    'hidden_layer_activation': torch.nn.ReLU, 
+    'hidden_bottleneck_activation': torch.nn.ReLU, # for Stack
+    'hidden_layer_activation': torch.nn.ReLU, # for NTK
 }
 configs_architecture.update(config_function)
 
 configs_traininig = {
     # training parameters
-    'criterion': torch.nn.MSELoss(),
+    'criterions': torch.nn.MSELoss(), # TODO allow multiple losses
     'shuffle': True,
     'epochs': 2, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
@@ -122,6 +126,7 @@ configs_traininig = {
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
+    # 'loss_activity': loss_ratio,
 }
 
 

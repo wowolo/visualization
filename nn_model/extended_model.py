@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 from nn_model.model_catalogue import ModelCatalogue
 import nn_model.util as nn_util
+from create_data import DataGenerators
 
 
 
@@ -26,32 +27,59 @@ class ExtendedModel(ModelCatalogue):
 
 
 
-    def train(self, x_train, y_train, **kwargs):
+    def train(self, x_train, y_train, loss_activity=None, **kwargs):
 
         if isinstance(self.config_architecture['architecture_key'], type(None)):
             return None
 
         self.config_training = self.init_config_training(**kwargs)
 
+        if isinstance(loss_activity, type(None)):
+            self.loss_activity = torch.ones_like(y_train)
+        elif isinstance(loss_activity, type(torch.Tensor())):
+            self.loss_activity = loss_activity.int()
+        else:
+            raise ValueError('You have supplied the loss activity not in the necessary torch.Tensor format.')
+        self.loss_activity = self.loss_activity.detach()
+
+        # check that the loss_activity is compatible with criterions config
+        max_loss = len(self.config_training['criterions'])
+        min_entry = self.loss_activity.min()
+        max_entry = self.loss_activity.max()
+        if min_entry < 0 or max_entry > max_loss:
+            raise ValueError('The entries of the loss activity assign losses between {} and {} while only entries between 0 and {} are possible.'.format(min_entry, max_entry, max_loss))
+
+
         epochs = self.config_training['epochs']    
         
         # prepare torch objects needed in training loop
         optimizer = self.config_training['update_rule'](self.parameters(), lr=self.config_training['learning_rate'])
-        training_generator = nn_util.DataGenerator(x_train, y_train, **self.config_training)
+        training_generators = DataGenerators(x_train, y_train, self.loss_activity, **self.config_training)
+        min_iter = min([training_generators[i].__len__() for i in range(len(training_generators))])
 
-        self.loss_wout_reg = list(np.empty(epochs * training_generator.__len__()))
+        self.loss_wout_reg = list(np.empty(epochs * min_iter)) 
         self.loss = list(np.empty_like(self.loss_wout_reg))
         ind_loss = 0
 
         for epoch in range(epochs):
 
             # print('Epoch: ', epoch)
+            data_retriever = [iter(data_generator) for data_generator in training_generators]
 
-            for X, y in training_generator:
+            for iteration in range(min_iter):
+                
+                loss = torch.tensor(0., requires_grad=True)
 
-                output = self.forward(X)
-                loss = self.config_training['criterion'](output, y)
-                self.loss_wout_reg[ind_loss] = float(loss)
+                for i in range(len(training_generators)):
+
+                    X, y, temp_loss_activity = next(data_retriever[i])
+
+                    output = self.forward(X)
+                    # compute loss based on config_training['criterions'] and loss activity
+                    for k in range(1, max(temp_loss_activity) + 1):
+                        _ind = (temp_loss_activity == k)
+                        loss = loss + self.config_training['criterions'][i](output[_ind], y[_ind])
+                    self.loss_wout_reg[ind_loss] = float(loss)
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
@@ -73,7 +101,7 @@ class ExtendedModel(ModelCatalogue):
     def init_config_training(self, **kwargs):
 
         default_extraction_strings = {
-            'criterion': torch.nn.MSELoss(),
+            'criterions': torch.nn.MSELoss(),
             'shuffle': True,
             'epochs': 1024, 
             'batch_size': 64,
@@ -81,9 +109,12 @@ class ExtendedModel(ModelCatalogue):
             'regularization_ord': 2,
             'learning_rate': 0.0001,
             'update_rule': torch.optim.Adam, 
+            'separate_loss_batching': True,
         }
 
         config_training = nn_util.create_config(kwargs, default_extraction_strings)
+
+        config_training['criterions'] = tuple(config_training['criterions'])
 
         return config_training
 
