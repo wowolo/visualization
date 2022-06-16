@@ -35,7 +35,7 @@ class ExtendedModel(ModelCatalogue):
         self.config_training = self.init_config_training(**kwargs)
 
         if isinstance(loss_activity, type(None)):
-            self.loss_activity = torch.ones_like(y_train)
+            self.loss_activity = torch.ones(y_train.shape[0])
         elif isinstance(loss_activity, type(torch.Tensor())):
             self.loss_activity = loss_activity.int()
         else:
@@ -64,20 +64,20 @@ class ExtendedModel(ModelCatalogue):
         for epoch in range(epochs):
 
             # print('Epoch: ', epoch)
-            data_retriever = [iter(data_generator) for data_generator in training_generators]
+            data_retrievers = [iter(data_generator) for data_generator in training_generators]
 
             for iteration in range(min_iter):
                 
                 loss = torch.tensor(0., requires_grad=True)
 
-                for i in range(len(training_generators)):
+                for i in range(len(data_retrievers)):
 
-                    X, y, temp_loss_activity = next(data_retriever[i])
+                    X, y, temp_loss_activity = next(data_retrievers[i])
 
                     output = self.forward(X)
                     # compute loss based on config_training['criterions'] and loss activity
-                    for k in range(1, max(temp_loss_activity) + 1):
-                        _ind = (temp_loss_activity == k)
+                    for loss_selec in range(1, int(max(temp_loss_activity)) + 1):
+                        _ind = (temp_loss_activity == loss_selec)
                         loss = loss + self.config_training['criterions'][i](output[_ind], y[_ind])
                     self.loss_wout_reg[ind_loss] = float(loss)
 
@@ -114,7 +114,8 @@ class ExtendedModel(ModelCatalogue):
 
         config_training = nn_util.create_config(kwargs, default_extraction_strings)
 
-        config_training['criterions'] = tuple(config_training['criterions'])
+        if not(isinstance(config_training['criterions'], type(tuple))):
+            config_training['criterions'] = (config_training['criterions'], )
 
         return config_training
 

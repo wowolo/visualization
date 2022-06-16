@@ -104,7 +104,7 @@ configs_data.update(config_function)
 configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
-    'depth': [1, 2], #], #,[1, 2, 6],
+    'depth': 1, #], #,[1, 2, 6],
     'width': None, #[16, 64, 256, 512, 2048, 8192],
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
     'variable_width': 5, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
@@ -126,7 +126,7 @@ configs_traininig = {
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
-    # 'loss_activity': loss_ratio,
+    'separate_loss_batching': True,
 }
 
 

@@ -140,7 +140,7 @@ class CustomDataset(Dataset):
     def __init__(self, x_train, y_train, loss_activity):
         
         self.x_train = x_train
-        self.y_train = torch.cat((y_train, self.loss_activity), 1)
+        self.y_train = y_train
         self.loss_activity = loss_activity
 
 
@@ -170,8 +170,8 @@ def DataGenerators(x_train, y_train, loss_activity, **kwargs):
     # structure the generator by shuffle and separate_loss_batching
     if bool_separate_loss_batching:
         # determine the ratios based on given loss_activity and “total” batch size
-        _total_activities = [(loss_activity == i).sum() for i in range(1, loss_activity.max() + 1)]
-        _ratios = _total_activities / sum(_total_activities)
+        _total_activities = [(loss_activity == i).sum() for i in range(1, int(loss_activity.max()) + 1)]
+        _ratios = [_total_activities[i] / sum(_total_activities) for i in range(len(_total_activities))]
         _max_ratio = np.argmax(_ratios)
 
         # guarantee that batch size is sufficiently large to sample according to non-zero ratios
@@ -180,15 +180,15 @@ def DataGenerators(x_train, y_train, loss_activity, **kwargs):
             raise ValueError("Since 'separate_loss_batching' is True and the loss_activity indicates that {} losses are used we need a total 'batch_size' of at least {}.".format(_min_batch_size, _min_batch_size))
         
         _batch_sizes = [max(1, int(ratio * dataloader_dict['batch_size'])) for ratio in _ratios]
-        _batch_sizes[_max_ratio] = dataloader_dict['batch_size'] - sum(_batch_sizes[:_max_ratio] + _batch_sizes[_max_ratio:])
-        _ind_lossdatas = [(loss_activity == i) for i in range(1, loss_activity.max() + 1)]
-        _dataset_partitions = [CustomDataset(x_train[_ind_lossdatas[i]], y_train[_ind_lossdatas[i]], loss_activity[_ind_lossdatas[i]]) for i in range(1, loss_activity.max() + 1)]
-        data_generators = (DataLoader(_dataset_partitions[i], batch_size=_batch_sizes[i], shuffle=dataloader_dict['shuffle']) for i in range(1, loss_activity.max() + 1))
+        _batch_sizes[_max_ratio] = dataloader_dict['batch_size'] - sum(_batch_sizes[:_max_ratio] + _batch_sizes[_max_ratio+1:])
+        _ind_lossdatas = [(loss_activity == i) for i in range(1, int(loss_activity.max()) + 1)]
+        _dataset_partitions = [CustomDataset(x_train[_ind_lossdatas[i]], y_train[_ind_lossdatas[i]], loss_activity[_ind_lossdatas[i]]) for i in range(len(_ind_lossdatas))]
+        data_generators = [DataLoader(_dataset_partitions[i], batch_size=_batch_sizes[i], shuffle=dataloader_dict['shuffle']) for i in range(len(_ind_lossdatas))]
         # if bool_print_datagen_config:
             # print the configuration with ratios
     else:
         dataset = CustomDataset(x_train, y_train, loss_activity)
-        data_generators =  (DataLoader(dataset, **dataloader_dict),)
+        data_generators =  [DataLoader(dataset, **dataloader_dict)]
         # if bool_print_datagen_config:
             # print data generator config
 
