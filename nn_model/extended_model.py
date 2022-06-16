@@ -114,8 +114,8 @@ class ExtendedModel(ModelCatalogue):
 
         config_training = nn_util.create_config(kwargs, default_extraction_strings)
 
-        if not(isinstance(config_training['criterions'], type(tuple))):
-            config_training['criterions'] = (config_training['criterions'], )
+        if not(isinstance(config_training['criterions'], list)):
+            config_training['criterions'] = [config_training['criterions']]
 
         return config_training
 

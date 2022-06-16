@@ -171,7 +171,7 @@ def DataGenerators(x_train, y_train, loss_activity, **kwargs):
     if bool_separate_loss_batching:
         # determine the ratios based on given loss_activity and “total” batch size
         _total_activities = [(loss_activity == i).sum() for i in range(1, int(loss_activity.max()) + 1)]
-        _ratios = [_total_activities[i] / sum(_total_activities) for i in range(len(_total_activities))]
+        _ratios = [float(_total_activities[i] / sum(_total_activities)) for i in range(len(_total_activities))]
         _max_ratio = np.argmax(_ratios)
 
         # guarantee that batch size is sufficiently large to sample according to non-zero ratios
@@ -184,14 +184,31 @@ def DataGenerators(x_train, y_train, loss_activity, **kwargs):
         _ind_lossdatas = [(loss_activity == i) for i in range(1, int(loss_activity.max()) + 1)]
         _dataset_partitions = [CustomDataset(x_train[_ind_lossdatas[i]], y_train[_ind_lossdatas[i]], loss_activity[_ind_lossdatas[i]]) for i in range(len(_ind_lossdatas))]
         data_generators = [DataLoader(_dataset_partitions[i], batch_size=_batch_sizes[i], shuffle=dataloader_dict['shuffle']) for i in range(len(_ind_lossdatas))]
-        # if bool_print_datagen_config:
+        
+        if bool_print_datagen_config:
             # print the configuration with ratios
+            min_iter =  min([data_generators[i].__len__() for i in range(len(data_generators))])
+            print('The following configuration has been used for the construction of the training loops:')
+            print('Data partition based on losses: {}'.format(bool_separate_loss_batching))
+            print('Number of losses considered: {}'.format(int(loss_activity.max())))
+            print('Data ratio for each partition: {}'.format(_ratios))
+            print('Total batch size: {}'.format(dataloader_dict['batch_size']))
+            print('Derived sub-batch sizes for each partition: {}'.format(_batch_sizes))
+            print('Number of iterations in one epoch: {}'.format(min_iter))
+            print('Shuffle: {}'.format(dataloader_dict['shuffle']))
+
+    
     else:
         dataset = CustomDataset(x_train, y_train, loss_activity)
         data_generators =  [DataLoader(dataset, **dataloader_dict)]
-        # if bool_print_datagen_config:
-            # print data generator config
-
-    # TODO print the mode of data configuration - shuffle & separate_loss_batching: ratios of data 
+        if bool_print_datagen_config:
+            # print the configuration with ratios
+            min_iter =  min([data_generators[i].__len__() for i in range(len(data_generators))])
+            print('The following configuration has been used for the construction of the training loops:')
+            print('Data partition based on losses: {}'.format(bool_separate_loss_batching))
+            print('Number of losses considered: {}'.format(int(loss_activity.max())))
+            print('Total batch sizes: {}'.format(dataloader_dict['batch_size']))
+            print('Number of iterations in one epoch: {}'.format(min_iter))
+            print('Shuffle: {}'.format(dataloader_dict['shuffle']))
 
     return data_generators

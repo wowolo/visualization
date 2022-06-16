@@ -118,7 +118,7 @@ configs_architecture.update(config_function)
 
 configs_traininig = {
     # training parameters
-    'criterions': torch.nn.MSELoss(), # TODO allow multiple losses
+    'criterions': [[torch.nn.MSELoss(), torch.nn.L1Loss()]], # TODO allow multiple losses
     'shuffle': True,
     'epochs': 2, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
@@ -140,8 +140,8 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
     configs_architecture, 
     configs_traininig
 )
-timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
-manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp), save_fig=True)
+# timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
+# manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp), save_fig=True)
 # %%
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
 # data_dict = {
@@ -158,29 +158,31 @@ manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_
 
 # %%
 # # create data and model
-# data = CreateData(
-#     **configs_data_list[0]
-# )
+data = CreateData(
+    **configs_data_list[0]
+)
 
-# nn_model = ExtendedModel(
-#     **configs_architecture_list[0]
-# )
+nn_model = ExtendedModel(
+    **configs_architecture_list[0]
+)
 
-# # set all involved tensors to device gpu/cpu
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+# set all involved tensors to device gpu/cpu
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-# x_train = data.x_train.to(device)
-# y_train = data.y_train.to(device)
-# x_val = data.x_val # .to(device)
-# y_val = data.y_val # .to(device)
-# nn_model.to(device)
+x_train = data.x_train.to(device)
+y_train = data.y_train.to(device)
+x_val = data.x_val # .to(device)
+y_val = data.y_val # .to(device)
+nn_model.to(device)
 
-# # train the model on the given data
-# nn_model.train(
-#     x_train, 
-#     y_train, 
-#     **configs_traininig_list[0]
-# )
+# train the model on the given data
+loss_activity = torch.randint(1,3, (y_train.shape[0],))
+nn_model.train(
+    x_train, 
+    y_train,
+    loss_activity, 
+    **configs_traininig_list[0]
+)
 
 # nn_model.plot2d(x_train, y_train, -1 , 1, -3, 3, save=True, dirname=Path().cwd() / 'figures')
 
