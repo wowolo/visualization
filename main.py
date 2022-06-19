@@ -9,6 +9,7 @@ from create_data import CreateData
 from nn_model import ExtendedModel
 from experiments import ExperimentManager
 import util
+import nn_model.util as nn_util
 
 
 
@@ -63,6 +64,11 @@ def f_1(x, focus_ind=0):
 def f_2(x, focus_ind=0):
     return np.stack([x[:,focus_ind]**2 -0.5, 2.0*(x[:,focus_ind]<0.3)*(x[:,focus_ind]-0.3)+1], axis=1)
 
+
+
+def f_3(x, focus_ind=0):
+    return util.function_library('compositeSine')(x)
+
 # defer config to bash script to run code?
 
 config_0 = {
@@ -86,7 +92,14 @@ config_2 = {
     'focus_ind': 0
 }
 
-config_function = config_0
+config_3 = {
+    'd_in': 1, # >= 2
+    'd_out': 7,
+    'f_true': f_3,
+    'focus_ind': 0
+}
+
+config_function = config_3
 
 # loss_ratio = util.create_loss_ratio(config_function['d_out'])
 
@@ -104,25 +117,25 @@ configs_data.update(config_function)
 configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
-    'depth': 1, #], #,[1, 2, 6],
-    'width': None, #[16, 64, 256, 512, 2048, 8192],
+    'depth': 3, #], #,[1, 2, 6],
+    'width': 32, #[16, 64, 256, 512, 2048, 8192],
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
-    'variable_width': 5, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
+    'variable_width': 1024, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': True, # for Stack
-    'hidden_bottleneck_activation': torch.nn.ReLU, # for Stack
+    'hidden_bottleneck_activation': nn_util.linear_activation, # for Stack
     'hidden_layer_activation': torch.nn.ReLU, # for NTK
 }
 configs_architecture.update(config_function)
 
 configs_traininig = {
     # training parameters
-    'criterions': [[torch.nn.MSELoss(), torch.nn.L1Loss()]], # TODO allow multiple losses
+    'criterions': [[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
-    'epochs': 2, #[1024, 4096], # 4096,
+    'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.1, #[0.1, 0.01, 0],
+    'regularization_alpha': 0.005, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
@@ -132,7 +145,7 @@ configs_traininig = {
 
 
 
-# %%
+# %% cell 1
 np.random.seed(seed=24)
 manager = ExperimentManager(ExtendedModel, CreateData)
 configs_data_list, configs_architecture_list, configs_traininig_list = manager.grid_config_lists(
@@ -140,9 +153,9 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
     configs_architecture, 
     configs_traininig
 )
-# timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
-# manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp), save_fig=True)
-# %%
+timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
+# manager.do_exerimentbatch(configs_data_list, configs_architecture_list, configs_traininig_list, 'experiments_{}'.format(timestamp), save_fig=False)
+# %% cell 2
 # replace the cell above by the ExperimentManager (allowing for robust documentation?!)
 # data_dict = {
 #     'x_train': x_train,
@@ -156,8 +169,8 @@ configs_data_list, configs_architecture_list, configs_traininig_list = manager.g
 # manager = ExperimentManager(nn_model, data_dict)
 # manager.do_exerimentbatch([configs, config_], 'test_experiment')
 
-# %%
-# # create data and model
+# %% cell 3
+# create data and model
 data = CreateData(
     **configs_data_list[0]
 )
@@ -176,7 +189,9 @@ y_val = data.y_val # .to(device)
 nn_model.to(device)
 
 # train the model on the given data
-loss_activity = torch.randint(1,3, (y_train.shape[0],))
+p_bernoulli = 0.8
+loss_activity = torch.ones((y_train.shape[0],)) * p_bernoulli
+loss_activity = (torch.bernoulli(loss_activity)) + 1
 nn_model.train(
     x_train, 
     y_train,
@@ -196,3 +211,18 @@ nn_model.train(
 #     plt.plot(data.x_val[:,0], data.y_val[:,targ_func], 'g.')
 #     plt.plot(data.x_val[:,0], nn_model.forward(data.x_val).detach()[:,targ_func], 'r.')
 #     plt.show()
+# %% cell 4
+# loading model - previously need to initialize model in cell 3 
+# path = Path().cwd() / 'experiments_13-50_19.06.2022' / 'experiment_0' / 'nn_model_weights.pt'
+# path = Path().cwd() / 'experiments_14-33_19.06.2022' / 'experiment_0' / 'nn_model_weights.pt'
+
+# nn_model.load_state_dict(torch.load(path))
+
+import matplotlib.pyplot as plt
+fig_folder = Path().cwd() / 'temp_fig'
+for i in range(7):
+    plt.figure()
+    plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i])
+    plt.plot(x_val.detach(), y_val.detach()[:,i])
+    plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i))
+# %%

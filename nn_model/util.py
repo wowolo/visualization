@@ -34,3 +34,21 @@ class linear_activation(torch.nn.Module): # currently implemented as identity
 
     def forward(self, x):
         return x
+
+
+class dimred_MSELoss(torch.nn.Module):
+
+    def __init__(self, dimension_activity):
+
+        super(dimred_MSELoss,self).__init__()
+        self.dimension_activity = dimension_activity
+    
+
+    
+    def forward(self, output, target):
+
+        if output.shape[0] == 0: return 0
+
+        dimred_output = output[:, self.dimension_activity]
+        dimred_target = target[:, self.dimension_activity]
+        return torch.mean((dimred_output - dimred_target)**2)

@@ -95,6 +95,8 @@ class ExtendedModel(ModelCatalogue):
                 optimizer.step()
 
                 ind_loss += 1
+            
+            print('Loss in epoch {}: {}'.format(epoch, loss))
 
 
 
