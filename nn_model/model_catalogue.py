@@ -26,7 +26,7 @@ class ModelMethods(nn.Module):
             'hidden_layer_activation': nn_util.linear_activation,
         }
         
-        config_architecture = util.create_config(kwargs, default_extraction_strings)
+        config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
         
         return config_architecture
 

@@ -39,7 +39,7 @@ class ExtendedModel(ModelCatalogue):
         elif isinstance(loss_activity, type(torch.Tensor())):
             self.loss_activity = loss_activity.int()
         else:
-            raise ValueError('You have supplied the loss activity not in the necessary torch.Tensor format.')
+            raise ValueError('You have not supplied the loss activity in the necessary torch.Tensor format.')
         self.loss_activity = self.loss_activity.detach()
 
         # check that the loss_activity is compatible with criterions config

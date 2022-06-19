@@ -93,7 +93,7 @@ config_2 = {
 }
 
 config_3 = {
-    'd_in': 1, # >= 2
+    'd_in': 1, # >= 1
     'd_out': 7,
     'f_true': f_3,
     'focus_ind': 0
@@ -108,9 +108,9 @@ configs_data = {
     # data parameters
     'n_samples': [256],
     'noise_scale': .1,
-    'x_min': -1,
-    'x_max': 1,
-    'n_val': 128,
+    'x_min': -2,
+    'x_max': 0,
+    'n_val': 512,
 }
 configs_data.update(config_function)
 
@@ -118,12 +118,12 @@ configs_architecture = {
     # architecture parameters
     'architecture_key': 'Stack', # ['Stack', 'NTK'],
     'depth': 3, #], #,[1, 2, 6],
-    'width': 32, #[16, 64, 256, 512, 2048, 8192],
+    'width': 512, #[16, 64, 256, 512, 2048, 8192], # for NTK
     'bottleneck_width': 256, # [16, 256, 512], # for Stack
     'variable_width': 1024, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
-    'skip_conn': True, # for Stack
+    'skip_conn': False, # for Stack
     'hidden_bottleneck_activation': nn_util.linear_activation, # for Stack
     'hidden_layer_activation': torch.nn.ReLU, # for NTK
 }
@@ -135,7 +135,7 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.0075, #[0.1, 0.01, 0],
+    'regularization_alpha': 0.005, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
@@ -146,6 +146,9 @@ configs_traininig = {
 
 
 # %% cell 1
+# TODO create new script handling data creation, model initialization and training + loss activity 
+# or “new” ExperimentManager
+# TODO integrate 1d plotting into extended model and the ExperimentManager (automatic recognition/keyword)
 np.random.seed(seed=24)
 manager = ExperimentManager(ExtendedModel, CreateData)
 configs_data_list, configs_architecture_list, configs_traininig_list = manager.grid_config_lists(
@@ -182,8 +185,23 @@ nn_model = ExtendedModel(
 # set all involved tensors to device gpu/cpu
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
-x_train = data.x_train.to(device)
-y_train = data.y_train.to(device) 
+# create 64 samples for loss 1 and 256 samples for loss 2
+n_samples_1 = 64
+x_max_1 = [0]
+data.config['n_samples'] = n_samples_1
+data.config['x_max'] = x_max_1
+y_train_1, x_train_1 = data.create_training_data() 
+
+n_samples_2 = 256
+x_max_2 = [2]
+data.config['n_samples'] = n_samples_2
+data.config['x_max'] = x_max_2
+y_train_2, x_train_2 = data.create_training_data() 
+
+x_train = torch.cat((x_train_1, x_train_2), dim=0).to(device)
+y_train = torch.cat((y_train_1, y_train_2), dim=0).to(device)
+
+
 x_val = data.x_val # .to(device)
 y_val = data.y_val # .to(device)
 nn_model.to(device)
@@ -194,9 +212,7 @@ x_val = x_val[ind_sort]
 y_val = y_val[ind_sort]
 
 # train the model on the given data
-p_bernoulli = 0.8
-loss_activity = torch.ones((y_train.shape[0],)) * p_bernoulli
-loss_activity = (torch.bernoulli(loss_activity)) + 1
+loss_activity = torch.cat((1 * torch.ones(n_samples_1) , 2 * torch.ones(n_samples_2)))
 nn_model.train(
     x_train, 
     y_train,
@@ -224,10 +240,13 @@ nn_model.train(
 # nn_model.load_state_dict(torch.load(path))
 
 import matplotlib.pyplot as plt
-fig_folder = Path().cwd() / 'temp_fig_reg'
+fig_folder = Path().cwd() / 'temp_fig_Stack'
 for i in range(7):
     plt.figure()
     plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i])
     plt.plot(x_val.detach(), y_val.detach()[:,i])
     plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i))
+# %%
+# Stack: depth 3, widths 256/1024
+# NTK:  depth 6, width 
 # %%

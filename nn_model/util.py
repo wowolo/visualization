@@ -51,4 +51,5 @@ class dimred_MSELoss(torch.nn.Module):
 
         dimred_output = output[:, self.dimension_activity]
         dimred_target = target[:, self.dimension_activity]
-        return torch.mean((dimred_output - dimred_target)**2)
+        
+        return torch.sum(torch.mean((dimred_output - dimred_target)**2, 1))

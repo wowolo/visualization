@@ -125,8 +125,8 @@ class CreateData():
 
         for i in range(d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            stretch = 2
-            center = (x_max[i] - x_min[i]) * 0.5
+            stretch = 3
+            center = (x_max[i] + x_min[i]) * 0.5
             temp_x_min = center + stretch * (x_min[i] - center)
             temp_x_max = center + stretch * (x_max[i] - center)
             x_val[:, i] = self._equi_data(n_val, temp_x_min, temp_x_max)

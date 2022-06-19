@@ -22,7 +22,7 @@ class NTK_Linear(nn.Module):
 
         if self.bias:
             self.b = nn.Parameter(torch.randn(self.output_width))
-            self.bias_tune = nn.Parameter(self.bias_tune, requires_grad=False)
+            self.bias_tune = nn.Parameter(torch.ones(1) * self.bias_tune, requires_grad=False)
         else:
             self.b = torch.zeros(self.output_width)
     
