@@ -109,7 +109,7 @@ configs_data = {
     'n_samples': [256],
     'noise_scale': .1,
     'x_min': -2,
-    'x_max': 0,
+    'x_max': 2,
     'n_val': 512,
 }
 configs_data.update(config_function)
