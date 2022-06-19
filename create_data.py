@@ -116,12 +116,12 @@ class CreateData():
 
 
     def create_valuation_data(self):
-        n_samples = self.config['n_samples']
+        n_val = self.config['n_val']
         x_min = self.config['x_min']
         x_max = self.config['x_max']
         d_in = self.config['d_in']
 
-        x_val = np.empty((n_samples, d_in))
+        x_val = np.empty((n_val, d_in))
 
         for i in range(d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
@@ -129,7 +129,7 @@ class CreateData():
             center = (x_max[i] - x_min[i]) * 0.5
             temp_x_min = center + stretch * (x_min[i] - center)
             temp_x_max = center + stretch * (x_max[i] - center)
-            x_val[:, i] = self._equi_data(n_samples, temp_x_min, temp_x_max)
+            x_val[:, i] = self._equi_data(n_val, temp_x_min, temp_x_max)
 
         # adjust function based on given focus_ind 
         f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
