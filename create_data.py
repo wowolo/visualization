@@ -125,7 +125,11 @@ class CreateData():
 
         for i in range(d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            x_val[:, i] = self._noise_data(n_samples, x_min[i], x_max[i]) * np.random.normal(scale=1.25, size=n_samples)
+            stretch = 2
+            center = (x_max[i] - x_min[i]) * 0.5
+            temp_x_min = center + stretch * (x_min[i] - center)
+            temp_x_max = center + stretch * (x_max[i] - center)
+            x_val[:, i] = self._equi_data(n_samples, temp_x_min, temp_x_max)
 
         # adjust function based on given focus_ind 
         f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])

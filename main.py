@@ -135,7 +135,7 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.005, #[0.1, 0.01, 0],
+    'regularization_alpha': 0.0075, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
@@ -183,10 +183,15 @@ nn_model = ExtendedModel(
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
 x_train = data.x_train.to(device)
-y_train = data.y_train.to(device)
+y_train = data.y_train.to(device) 
 x_val = data.x_val # .to(device)
 y_val = data.y_val # .to(device)
 nn_model.to(device)
+
+# sort x_val
+ind_sort = torch.argsort(x_val.detach(), axis=0)[:, 0]
+x_val = x_val[ind_sort]
+y_val = y_val[ind_sort]
 
 # train the model on the given data
 p_bernoulli = 0.8
@@ -219,7 +224,7 @@ nn_model.train(
 # nn_model.load_state_dict(torch.load(path))
 
 import matplotlib.pyplot as plt
-fig_folder = Path().cwd() / 'temp_fig'
+fig_folder = Path().cwd() / 'temp_fig_reg'
 for i in range(7):
     plt.figure()
     plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i])
