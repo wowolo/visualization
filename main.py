@@ -135,7 +135,7 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.005, #[0.1, 0.01, 0],
+    'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
@@ -240,12 +240,18 @@ nn_model.train(
 # nn_model.load_state_dict(torch.load(path))
 
 import matplotlib.pyplot as plt
-fig_folder = Path().cwd() / 'temp_fig_Stack'
+fig_folder = Path().cwd() / 'exp_2'
 for i in range(7):
     plt.figure()
-    plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i])
-    plt.plot(x_val.detach(), y_val.detach()[:,i])
-    plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i))
+    if i == 0:
+        plt.scatter(x_train_1, y_train_1[:,i], marker='x', color='red', label='Loss 1 - training data')
+    else:
+        plt.scatter(x_train_2, y_train_2[:,i], marker='x', color='green', label='Loss 2 - training data')
+    plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], label='Stacked NN')
+    plt.plot(x_val.detach(), y_val.detach()[:,i], label='True function')
+    plt.title('Experiment 2 - Loss 1 and loss 2.')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
+    plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i), bbox_inches="tight")
 # %%
 # Stack: depth 3, widths 256/1024
 # NTK:  depth 6, width 

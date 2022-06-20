@@ -125,7 +125,7 @@ class CreateData():
 
         for i in range(d_in):
             # random evaluation points (possibly outside of [x_min, x_max])
-            stretch = 3
+            stretch = 1
             center = (x_max[i] + x_min[i]) * 0.5
             temp_x_min = center + stretch * (x_min[i] - center)
             temp_x_max = center + stretch * (x_max[i] - center)
