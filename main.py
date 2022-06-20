@@ -186,13 +186,13 @@ nn_model = ExtendedModel(
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
 # create 64 samples for loss 1 and 256 samples for loss 2
-n_samples_1 = 64
+n_samples_1 = 256
 x_max_1 = [0]
 data.config['n_samples'] = n_samples_1
 data.config['x_max'] = x_max_1
 y_train_1, x_train_1 = data.create_training_data() 
 
-n_samples_2 = 256
+n_samples_2 = 0
 x_max_2 = [2]
 data.config['n_samples'] = n_samples_2
 data.config['x_max'] = x_max_2
@@ -240,16 +240,16 @@ nn_model.train(
 # nn_model.load_state_dict(torch.load(path))
 
 import matplotlib.pyplot as plt
-fig_folder = Path().cwd() / 'exp_2'
+fig_folder = Path().cwd() / 'exp_1'
 for i in range(7):
     plt.figure()
     if i == 0:
-        plt.scatter(x_train_1, y_train_1[:,i], marker='x', color='red', label='Loss 1 - training data')
+        plt.plot(x_train_1, y_train_1[:,i], 'ko', markersize=8, label='Training data')
     else:
-        plt.scatter(x_train_2, y_train_2[:,i], marker='x', color='green', label='Loss 2 - training data')
-    plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], label='Stacked NN')
-    plt.plot(x_val.detach(), y_val.detach()[:,i], label='True function')
-    plt.title('Experiment 2 - Loss 1 and loss 2.')
+        plt.plot(x_train_2, y_train_2[:,i], 'ko', markersize=8, label='Training data')
+    plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], 'r-', label='Stacked NN')
+    plt.plot(x_val.detach(), y_val.detach()[:,i], 'k-', label='True function')
+    plt.title('Experiment 1 - Loss 1.')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
     plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i), bbox_inches="tight")
 # %%
