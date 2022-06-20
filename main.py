@@ -244,11 +244,12 @@ fig_folder = Path().cwd() / 'exp_1'
 for i in range(7):
     plt.figure()
     if i == 0:
-        plt.plot(x_train_1, y_train_1[:,i], 'ko', markersize=8, label='Training data')
+        plt.plot(x_train_1, y_train_1[:,i], 'ko', markersize=3, label='Training data')
     else:
-        plt.plot(x_train_2, y_train_2[:,i], 'ko', markersize=8, label='Training data')
+        plt.plot(x_train_2, y_train_2[:,i], 'ko', markersize=3, label='Training data')
     plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], 'r-', label='Stacked NN')
     plt.plot(x_val.detach(), y_val.detach()[:,i], 'k-', label='True function')
+    plt.ylim(top=2.2, bottom=-2.2) 
     plt.title('Experiment 1 - Loss 1.')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
     plt.savefig(fig_folder / 'temp_fig_{}.png'.format(i), bbox_inches="tight")
