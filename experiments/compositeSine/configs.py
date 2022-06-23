@@ -13,7 +13,7 @@ import nn_model.util as nn_util
 
 
 # f_true functions
-def f(x, focus_ind=0):
+def f(x):
     return util.function_library('compositeSine')(x)
 
 config_function = {
@@ -62,4 +62,9 @@ configs_traininig = {
     'learning_rate': [0.0001],
     'update_rule': torch.optim.Adam, 
     'separate_loss_batching': True,
+}
+
+# configs customised for the specific experiment setup
+configs_custom = {
+    'n_samples_per_loss': 
 }

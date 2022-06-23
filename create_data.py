@@ -1,3 +1,4 @@
+from inspect import signature
 import numpy as np
 import torch
 from torch.utils.data import Dataset, TensorDataset, DataLoader
@@ -23,14 +24,14 @@ class CreateData():
 
 
     @staticmethod
-    def _noise_data(n_samples, x_min_i, x_max_i):
-        return np.random.normal(size=n_samples) % (x_max_i - x_min_i) + (x_max_i + x_min_i) / 2
+    def _uniform_data(n_samples, x_min_i, x_max_i):
+        return np.random.rand(n_samples) * (x_max_i - x_min_i) + x_min_i
 
 
 
     @staticmethod
-    def _uniform_data(n_samples, x_min_i, x_max_i):
-        return np.random.rand(n_samples) * (x_max_i - x_min_i) + x_min_i
+    def _noise_data(n_samples, x_min_i, x_max_i):
+        return np.random.normal(size=n_samples) % (x_max_i - x_min_i) + (x_max_i + x_min_i) / 2
 
 
 
@@ -54,9 +55,9 @@ class CreateData():
         if isinstance(self.config['x_max'], int):
             self.config['x_max'] = [self.config['x_max'] for i in range(self.config['d_in'])]
 
-        # create training and valuation data
-        self.y_train, self.x_train = self.create_training_data()
-        self.y_val, self.x_val = self.create_valuation_data()
+        # # create training and valuation data
+        # self.y_train, self.x_train = self.create_training_data()
+        # self.y_val, self.x_val = self.create_valuation_data()
 
 
     
@@ -71,7 +72,8 @@ class CreateData():
             'x_max': 1, 
             'n_samples': 256, 
             'noise_scale': .1,
-            'n_val': 128
+            'n_val': 128,
+            'data_generators': 'equi',
         }
 
         config = {string: None for string in default_extraction_strings}
@@ -91,24 +93,42 @@ class CreateData():
 
     def create_training_data(self):
         
+        d_in = self.config['d_in']
         n_samples = self.config['n_samples']
         x_min = self.config['x_min']
         x_max = self.config['x_max']
 
         x_train = np.empty((n_samples, self.config['d_in']))
 
-        for i in range(self.config['d_in']):
-            if i == 0:
-                x_train[:, i] = self._equi_data(n_samples, x_min[i], x_max[i])
-            
-            elif i == 1:
-                x_train[:, i] = self._periodic_data(n_samples, x_min[i], x_max[i])
-            
-            else:
-                x_train[:, i] = self._noise_data(n_samples, x_min[i], x_max[i])
+        data_generators = self.config['data_generators']
+        if not(isinstance(data_generators, list)):
+            data_generators = [data_generators]
+        data_generators = data_generators[:d_in]
+
+        if len(data_generators) < d_in: # default: fill missing data generators with last entry
+            data_generators.append(data_generators[-1])
         
+
+        for d in range(d_in): # create data according to data generator in each dimension
+
+            if data_generators[d] == 'equi':
+                x_train[:, d] = self._equi_data(n_samples, x_min[d], x_max[d])
+            
+            elif data_generators[d] == 'uniform':
+                x_train[:, d] = self._uniform_data(n_samples, x_min[d], x_max[d])
+
+            elif data_generators[d] == 'periodic':
+                x_train[:, d] = self._periodic_data(n_samples, x_min[d], x_max[d])
+            
+            elif data_generators[d] == 'noise':
+                x_train[:, d] = self._noise_data(n_samples, x_min[d], x_max[d])
+    
         # adjust function based on given focus_ind 
-        f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+        if len(signature(self.config['focus_ind']).parameters) == 1:
+            f_true = lambda x: self.config['f_true'](x)
+        else:
+            f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+
         y_train = f_true(x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
 
         return util.to_tensor(y_train), util.to_tensor(x_train)
