@@ -66,5 +66,5 @@ configs_traininig = {
 
 # configs customised for the specific experiment setup
 configs_custom = {
-    'n_samples_per_loss': 
+    'n_samples_per_loss': [[64, 256]]
 }
