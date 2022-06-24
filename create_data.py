@@ -1,4 +1,5 @@
 from inspect import signature
+from functools import wraps
 import numpy as np
 import torch
 from torch.utils.data import Dataset, TensorDataset, DataLoader
@@ -46,15 +47,24 @@ class CreateData():
 
 
 
+    def clean_bounds(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            for bound_key in ['x_min', 'x_max']:
+                if isinstance(self.config[bound_key], int):
+                    self.config[bound_key] = [self.config[bound_key] for i in range(self.config['d_in'])]
+            return func(self, *args, **kwargs)
+        return wrapper
+
+
+
     def __init__(self, **kwargs):
 
         self.config = self.init_config(**kwargs)
 
-        if isinstance(self.config['x_min'], int):
-            self.config['x_min'] = [self.config['x_min'] for i in range(self.config['d_in'])]
-        if isinstance(self.config['x_max'], int):
-            self.config['x_max'] = [self.config['x_max'] for i in range(self.config['d_in'])]
-
+        # self.clean_bounds('x_min')
+        # self.clean_bounds('x_max')
+        
         # # create training and valuation data
         # self.y_train, self.x_train = self.create_training_data()
         # self.y_val, self.x_val = self.create_valuation_data()
@@ -91,6 +101,7 @@ class CreateData():
 
     
 
+    @clean_bounds
     def create_training_data(self):
         
         d_in = self.config['d_in']
@@ -124,22 +135,24 @@ class CreateData():
                 x_train[:, d] = self._noise_data(n_samples, x_min[d], x_max[d])
     
         # adjust function based on given focus_ind 
-        if len(signature(self.config['focus_ind']).parameters) == 1:
+        if len(signature(self.config['f_true']).parameters) == 1:
             f_true = lambda x: self.config['f_true'](x)
         else:
             f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
 
         y_train = f_true(x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
 
-        return util.to_tensor(y_train), util.to_tensor(x_train)
+        return util.to_tensor(x_train), util.to_tensor(y_train)
 
 
 
+    @clean_bounds
     def create_valuation_data(self):
+
+        d_in = self.config['d_in']
         n_val = self.config['n_val']
         x_min = self.config['x_min']
         x_max = self.config['x_max']
-        d_in = self.config['d_in']
 
         x_val = np.empty((n_val, d_in))
 
@@ -152,10 +165,14 @@ class CreateData():
             x_val[:, i] = self._equi_data(n_val, temp_x_min, temp_x_max)
 
         # adjust function based on given focus_ind 
-        f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+        if len(signature(self.config['f_true']).parameters) == 1:
+            f_true = lambda x: self.config['f_true'](x)
+        else:
+            f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+            
         y_val = f_true(x_val) 
 
-        return util.to_tensor(y_val), util.to_tensor(x_val)
+        return util.to_tensor(x_val), util.to_tensor(y_val)
 
     
 

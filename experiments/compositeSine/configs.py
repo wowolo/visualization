@@ -1,12 +1,7 @@
-from pathlib import Path
-from datetime import datetime
 import numpy as np
 import torch
 # import matplotlib.pyplot as plt
 
-from create_data import CreateData
-from nn_model import ExtendedModel
-from experiments import ExperimentManager
 import util
 import nn_model.util as nn_util
 
@@ -55,7 +50,7 @@ configs_traininig = {
     # training parameters
     'criterions': [[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
-    'epochs': 2048, #[1024, 4096], # 4096,
+    'epochs': 5,#2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
@@ -66,5 +61,9 @@ configs_traininig = {
 
 # configs customised for the specific experiment setup
 configs_custom = {
-    'n_samples_per_loss': [[64, 256]]
+    'n_samples_per_loss': [[64, 256]],
+    'x_max_per_loss': [[0, 2]],
+    'save_fig': True,
+    'torch_seed': 13,
+    'numpy_seed': 33,
 }
