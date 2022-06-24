@@ -28,7 +28,7 @@ def create_config(kwargs, default_extraction_strings):
 
 
 
-class linear_activation(torch.nn.Module): # currently implemented as identity
+class identity_activation(torch.nn.Module): # currently implemented as identity
     def __init__(self) -> None:
         super().__init__()
 

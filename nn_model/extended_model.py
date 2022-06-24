@@ -18,6 +18,31 @@ from create_data import DataGenerators
 class ExtendedModel(ModelCatalogue):
     # adds a training and various plotting methods
 
+    @staticmethod
+    def _criterion_fm(string):
+        if isinstance(string, str):
+            return {
+                'MSELoss': torch.nn.MSELoss(),
+            }[string]
+        elif isinstance(string, tuple):
+            args = string[1:]
+            string = string[0]
+            return {
+                'dimred_MSELoss': nn_util.dimred_MSELoss(*args),
+            }[string]
+        else:
+            raise ReferenceError('The function keyword is not yet implemented.')
+    
+
+
+    @staticmethod
+    def _update_rule_fm(string):
+        return {
+            'Adam': torch.optim.Adam,
+        }[string]
+
+
+
     def __init__(self, **kwargs):
 
         super(ExtendedModel, self).__init__(**kwargs) # pass appropriate input to create architecture
@@ -53,7 +78,8 @@ class ExtendedModel(ModelCatalogue):
         epochs = self.config_training['epochs']    
         
         # prepare torch objects needed in training loop
-        optimizer = self.config_training['update_rule'](self.parameters(), lr=self.config_training['learning_rate'])
+        update = self._update_rule_fm(self.config_training['update_rule'])
+        optimizer = update(self.parameters(), lr=self.config_training['learning_rate'])
         training_generators = DataGenerators(x_train, y_train, self.loss_activity, **self.config_training)
         min_iter = min([training_generators[i].__len__() for i in range(len(training_generators))])
 
@@ -78,7 +104,8 @@ class ExtendedModel(ModelCatalogue):
                     # compute loss based on config_training['criterions'] and loss activity
                     for loss_selec in range(1, int(max(temp_loss_activity)) + 1):
                         _ind = (temp_loss_activity == loss_selec)
-                        loss = loss + self.config_training['criterions'][i](output[_ind], y[_ind])
+                        criterion = self._criterion_fm(self.config_training['criterions'][i])
+                        loss = loss + criterion(output[_ind], y[_ind])
                     self.loss_wout_reg[ind_loss] = float(loss)
 
                 # add regularization terms to loss
@@ -103,14 +130,14 @@ class ExtendedModel(ModelCatalogue):
     def init_config_training(self, **kwargs):
 
         default_extraction_strings = {
-            'criterions': torch.nn.MSELoss(),
+            'criterions': 'MSELoss',
             'shuffle': True,
             'epochs': 1024, 
             'batch_size': 64,
             'regularization_alpha': 0.1, 
             'regularization_ord': 2,
             'learning_rate': 0.0001,
-            'update_rule': torch.optim.Adam, 
+            'update_rule': 'Adam', 
             'separate_loss_batching': True,
         }
 

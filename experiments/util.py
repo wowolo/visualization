@@ -81,6 +81,10 @@ class BasicManager():
                 json_dict = {key: self.make_jsonable(dict[key]) for key in dict.keys()}
                 file.write(json.dumps(json_dict))
 
+
+
+    # def file_to_dict()...
+    
     
 
     def list_to_file(self, list_, file_path, format='v'):

@@ -9,6 +9,21 @@ class ModelMethods(nn.Module):
     # parameters/layers all have to be contained in self.layers attribute
     # method names have to have form init_arch_{}, forward_{} (.format(key))
 
+    @staticmethod
+    def _hidden_bottleneck_activation_fm(string):
+        return {
+            'Identity': nn_util.identity_activation,
+            'ReLU': nn.ReLU,
+        }[string]
+    
+    @staticmethod
+    def _hidden_layer_activation_fm(string):
+        return {
+            'Identity': nn_util.identity_activation,
+            'ReLU': nn.ReLU,
+        }[string]
+            
+
     def __init__(self):
         super(ModelMethods, self).__init__()
 
@@ -23,7 +38,7 @@ class ModelMethods(nn.Module):
             'd_out': None, 
             'width': 64, 
             'depth': 3, 
-            'hidden_layer_activation': nn_util.linear_activation,
+            'hidden_layer_activation': 'ReLU',
         }
         
         config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
@@ -58,7 +73,8 @@ class ModelMethods(nn.Module):
     def forward_NTK(self, x, **config_architecture):
 
         for layer in self.layers[:-1]:
-            x = config_architecture['hidden_layer_activation']()(layer(x))
+            activation = self._hidden_layer_activation_fm(config_architecture['hidden_layer_activation'])
+            x = activation()(layer(x))
         
         x = self.layers[-1](x)
         
@@ -79,7 +95,7 @@ class ModelMethods(nn.Module):
             'skip_conn': False, 
             'linear_skip_conn': False,
             'linear_skip_conn_width': 32,
-            'hidden_bottleneck_activation': nn_util.linear_activation,
+            'hidden_bottleneck_activation': 'Identity',
         }
         
         config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
@@ -144,7 +160,8 @@ class ModelMethods(nn.Module):
     def forward_Stack(self, x, **config_architecture):
 
         for layer in self.layers[:-1]:
-            x = config_architecture['hidden_bottleneck_activation']()(layer(x))
+            activation = self._hidden_bottleneck_activation_fm(config_architecture['hidden_bottleneck_activation'])
+            x = activation()(layer(x))
         
         x = self.layers[-1](x)
         

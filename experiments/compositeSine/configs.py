@@ -40,22 +40,26 @@ configs_architecture = {
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': False, # for Stack
-    'hidden_bottleneck_activation': nn_util.linear_activation, # for Stack
-    'hidden_layer_activation': torch.nn.ReLU, # for NTK
+    #########
+    'hidden_bottleneck_activation': 'Identity', #nn_util.identity_activation, # for Stack
+    #########
+    'hidden_layer_activation': 'ReLU', #torch.nn.ReLU, # for NTK
 }
 configs_architecture.update(config_function)
 
 # configs for model training
 configs_traininig = {
     # training parameters
-    'criterions': [[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
+    #########
+    'criterions': [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], #[[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
     'epochs': 5,#2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
     'regularization_alpha': 0.1, #[0.1, 0.01, 0],
     'regularization_ord': 2,
     'learning_rate': [0.0001],
-    'update_rule': torch.optim.Adam, 
+    #########
+    'update_rule': 'Adam', #torch.optim.Adam, 
     'separate_loss_batching': True,
 }
 
