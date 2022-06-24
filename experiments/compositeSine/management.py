@@ -4,8 +4,8 @@ import torch
 import matplotlib.pyplot as plt
 
 from experiments.util import BasicManager
-from create_data import CreateData
-from nn_model import ExtendedModel
+from core_code.create_data import CreateData
+from core_code.nn_model import ExtendedModel
 
 
 

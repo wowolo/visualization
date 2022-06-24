@@ -2,8 +2,8 @@ import numpy as np
 import torch
 # import matplotlib.pyplot as plt
 
-import util
-import nn_model.util as nn_util
+import core_code.util as util
+import core_code.nn_model.util as nn_util
 
 
 

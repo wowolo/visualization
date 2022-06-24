@@ -8,8 +8,8 @@ __pycache__/
 # ignore html files
 *.html
 
-# any experiment_data
-experiments_*
+# any data within a storage directory
+storage/
 
 # ignore ?random file? - no idea what it does
 .DS_Store
