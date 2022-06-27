@@ -32,11 +32,11 @@ configs_data.update(config_function)
 # configs for model architecture
 configs_architecture = {
     # architecture parameters
-    'architecture_key': 'Stack', # ['Stack', 'NTK'],
-    'depth': 3, #], #,[1, 2, 6],
-    'width': 512, #[16, 64, 256, 512, 2048, 8192], # for NTK
-    'bottleneck_width': 256, # [16, 256, 512], # for Stack
-    'variable_width': 1024, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
+    'architecture_key': ['NTK', 'Stack'], # ['Stack', 'NTK'],
+    'depth': [3, 8], #], #,[1, 2, 6],
+    'width': 4096, #[16, 64, 256, 512, 2048, 8192], # for NTK
+    'bottleneck_width': 4096, # [16, 256, 512], # for Stack
+    'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
     'linear_skip_conn_width': 64, # for Stack
     'skip_conn': False, # for Stack
@@ -53,11 +53,11 @@ configs_traininig = {
     #########
     'criterions': [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], #[[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
-    'epochs': 5,#2048, #[1024, 4096], # 4096,
+    'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.1, #[0.1, 0.01, 0],
+    'regularization_alpha': [0.1, 0.01, 0.00001],
     'regularization_ord': 2,
-    'learning_rate': [0.0001],
+    'learning_rate': [0.00005],
     #########
     'update_rule': 'Adam', #torch.optim.Adam, 
     'separate_loss_batching': True,
