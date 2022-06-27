@@ -142,7 +142,7 @@ class ExperimentManager(BasicManager):
                     set_counter = 0
                     for loss_num, (_, active_dim) in enumerate(config_training['criterions']):
                         if i in active_dim:
-                            plt.plot(x_train_list[i], y_train_list[i][:,i], grayscale_list[set_counter] + 'o', markersize=8, label='Training data - loss {}'.format(loss_num))
+                            plt.plot(x_train_list[loss_num], y_train_list[loss_num][:,i], 'o', color=grayscale_list[set_counter], markersize=3, label='Training data - Loss {}'.format(loss_num + 1))
                             set_counter = (set_counter + 1) % len(grayscale_list)
                             # if i == 0:
                             #     plt.plot(x_train_1, y_train_1[:,i], 'ko', markersize=8, label='Training data')
@@ -150,8 +150,8 @@ class ExperimentManager(BasicManager):
                             #     plt.plot(x_train_2, y_train_2[:,i], 'ko', markersize=8, label='Training data')
                     plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], 'r-', label='Stacked NN')
                     plt.plot(x_val.detach(), y_val.detach()[:,i], 'k-', label='True function')
-                    plt.title('CompositeSine Experimen - Output dimension {}; Loss {}.'.format(i, loss_num))
-                    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
+                    plt.title('CompositeSine Experimen - Output dimension {}'.format(i))
+                    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=2 + set_counter)
                     plt.savefig(figure_path / 'fig_{}.png'.format(i), bbox_inches="tight")
             
             # document the experiment within the experiment batch folder
