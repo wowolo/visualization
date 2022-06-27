@@ -1,6 +1,6 @@
 from torch import nn
 
-from core_code.nn_model.custom_layers import Stack_Core, NTK_Linear
+from core_code.nn_model.custom_layers import Stack_Core, NTK_Linear, abc_Layer
 import core_code.util as util
 import core_code.nn_model.util as nn_util
 
@@ -161,6 +161,64 @@ class ModelMethods(nn.Module):
 
         for layer in self.layers[:-1]:
             activation = self._hidden_bottleneck_activation_fm(config_architecture['hidden_bottleneck_activation'])
+            x = activation()(layer(x))
+        
+        x = self.layers[-1](x)
+        
+        return x
+
+
+
+########## abcMLP methods ##########
+
+    def init_config_abcMLP(self, **kwargs):
+        # extract necessary hyperparameters
+        default_extraction_strings = {
+            'd_in': None, 
+            'd_out': None, 
+            'width': 64, 
+            'depth': 3, 
+            'a': .25, # allow array according to depth + make default mup
+            'b': .25, # allow array according to depth + make default mup
+            'c': .01, # allow array according to depth + make default mup
+            'hidden_layer_activation': 'ReLU',
+        }
+        
+        config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
+        
+        return config_architecture
+
+
+
+    def init_arch_abcMLP(self, **config_architecture):
+        # extract necessary hyperparameters
+        mod_list = []
+        d_in = config_architecture['d_in']
+        d_out = config_architecture['d_out']
+        depth = config_architecture['depth']
+        width = config_architecture['width']
+        a = config_architecture['a']
+        b = config_architecture['b']
+
+        for i in range(depth):
+            if depth == 1:
+                mod_list.append(abc_Layer(d_in, d_out, a, b))
+            else:
+                if i == 0:
+                    mod_list.append(abc_Layer(d_in, width, a, b))
+                elif i < depth - 1:
+                    mod_list.append(abc_Layer(width, width, a, b))
+                else:
+                    mod_list.append(abc_Layer(width, d_out, a, b))
+
+        self.layers = nn.ModuleList(mod_list).double()
+
+
+    
+    def forward_abcMLP(self, x, **config_architecture):
+
+        for layer in self.layers[:-1]:
+            activation = self._hidden_layer_activation_fm(config_architecture['hidden_layer_activation'])
             x = activation()(layer(x))
         
         x = self.layers[-1](x)

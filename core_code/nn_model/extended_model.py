@@ -39,6 +39,7 @@ class ExtendedModel(ModelCatalogue):
     def _update_rule_fm(string):
         return {
             'Adam': torch.optim.Adam,
+            'SGD': torch.optim.SGD,
         }[string]
 
 
