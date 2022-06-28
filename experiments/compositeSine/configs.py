@@ -32,9 +32,9 @@ configs_data.update(config_function)
 # configs for model architecture
 configs_architecture = {
     # architecture parameters
-    'architecture_key': ['NTK', 'Stack'], # ['Stack', 'NTK'],
-    'depth': [3, 8], #], #,[1, 2, 6],
-    'width': 4096, #[16, 64, 256, 512, 2048, 8192], # for NTK
+    'architecture_key': ['NTK'],
+    'depth': [3, 8],
+    'width': 4096, # for NTK
     'bottleneck_width': 4096, # [16, 256, 512], # for Stack
     'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
@@ -55,9 +55,9 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': [0.1, 0.01, 0.00001],
+    'regularization_alpha': [0.00001, 5e-5, 2e-6, 8e-6],
     'regularization_ord': 2,
-    'learning_rate': [0.00005],
+    'learning_rate': [0.0001],
     #########
     'update_rule': 'Adam', #torch.optim.Adam, 
     'separate_loss_batching': True,

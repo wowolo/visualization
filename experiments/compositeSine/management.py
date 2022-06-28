@@ -98,13 +98,13 @@ class ExperimentManager(BasicManager):
             x_train_list = [[]] * num_losses
             y_train_list = [[]] * num_losses
 
-            for i, (n_samples, x_max) in enumerate(zip(config_custom['n_samples_per_loss'], config_custom['x_max_per_loss'])):
+            for j, (n_samples, x_max) in enumerate(zip(config_custom['n_samples_per_loss'], config_custom['x_max_per_loss'])):
 
                 data.config['n_samples'] = n_samples
                 data.config['x_max'] = x_max
-                x_train_list[i], y_train_list[i] = data.create_training_data() 
+                x_train_list[j], y_train_list[j] = data.create_training_data() 
 
-            loss_activity = torch.cat([(i+1) * torch.ones(len(x_train_list[i])) for i in range(num_losses)])
+            loss_activity = torch.cat([(j+1) * torch.ones(len(x_train_list[j])) for j in range(num_losses)])
 
             x_train = torch.cat(x_train_list, dim=0).to(device)
             y_train = torch.cat(y_train_list, dim=0).to(device)
@@ -153,6 +153,7 @@ class ExperimentManager(BasicManager):
                     plt.title('CompositeSine Experimen - Output dimension {}'.format(i))
                     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=2 + set_counter)
                     plt.savefig(figure_path / 'fig_{}.png'.format(i), bbox_inches="tight")
+                    plt.close('all')
             
             # document the experiment within the experiment batch folder
             self.write_documentation(experiment_path, data, nn_model, config_custom)
