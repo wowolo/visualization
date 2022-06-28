@@ -57,7 +57,7 @@ configs_traininig = {
     'batch_size': 64, #[64, 256],
     'regularization_alpha': [0.00001, 5e-5, 2e-6, 8e-6],
     'regularization_ord': 2,
-    'learning_rate': [0.0001],
+    'learning_rate': [0.001],
     #########
     'update_rule': 'Adam', #torch.optim.Adam, 
     'separate_loss_batching': True,
