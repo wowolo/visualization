@@ -16,17 +16,16 @@ from core_code.create_data import DataGenerators
 
 
 class ExtendedModel(ModelCatalogue):
-    # adds a training and various plotting methods
 
     @staticmethod
-    def _criterion_fm(string):
-        if isinstance(string, str):
+    def _criterions_fm(value):
+        if isinstance(value, str):
             return {
                 'MSELoss': torch.nn.MSELoss(),
-            }[string]
-        elif isinstance(string, tuple):
-            args = string[1:]
-            string = string[0]
+            }[value]
+        elif isinstance(value, tuple):
+            args = value[1:]
+            string = value[0]
             return {
                 'dimred_MSELoss': nn_util.dimred_MSELoss(*args),
             }[string]
@@ -36,11 +35,11 @@ class ExtendedModel(ModelCatalogue):
 
 
     @staticmethod
-    def _update_rule_fm(string):
+    def _update_rule_fm(value):
         return {
             'Adam': torch.optim.Adam,
             'SGD': torch.optim.SGD,
-        }[string]
+        }[value]
 
 
 
@@ -105,7 +104,7 @@ class ExtendedModel(ModelCatalogue):
                     # compute loss based on config_training['criterions'] and loss activity
                     for loss_selec in range(1, int(max(temp_loss_activity)) + 1):
                         _ind = (temp_loss_activity == loss_selec)
-                        criterion = self._criterion_fm(self.config_training['criterions'][i])
+                        criterion = self._criterions_fm(self.config_training['criterions'][i])
                         loss = loss + criterion(output[_ind], y[_ind])
                     self.loss_wout_reg[ind_loss] = float(loss)
 
@@ -146,6 +145,8 @@ class ExtendedModel(ModelCatalogue):
 
         if not(isinstance(config_training['criterions'], list)):
             config_training['criterions'] = [config_training['criterions']]
+
+        config_training = self._function_maker(config_training)
 
         return config_training
 

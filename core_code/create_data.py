@@ -44,9 +44,17 @@ class CreateData():
         data = np.concatenate((per_1, per_2))
         return data
 
+    
+
+    @staticmethod
+    def _f_true_fm(value):
+        f_true = util.function_library(value)
+        return f_true
 
 
-    def clean_bounds(func):
+
+
+    def clean_1dbounds(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             for bound_key in ['x_min', 'x_max']:
@@ -60,9 +68,6 @@ class CreateData():
     def __init__(self, **kwargs):
 
         self.config = self.init_config(**kwargs)
-
-        # self.clean_bounds('x_min')
-        # self.clean_bounds('x_max')
         
         # # create training and valuation data
         # self.y_train, self.x_train = self.create_training_data()
@@ -100,7 +105,7 @@ class CreateData():
 
     
 
-    @clean_bounds
+    @clean_1dbounds
     def create_training_data(self):
         
         d_in = self.config['d_in']
@@ -134,10 +139,10 @@ class CreateData():
                 x_train[:, d] = self._noise_data(n_samples, x_min[d], x_max[d])
     
         # adjust function based on given focus_ind 
-        if len(signature(self.config['f_true']).parameters) == 1:
-            f_true = lambda x: self.config['f_true'](x)
+        if len(signature(self._f_true_fm(self.config['f_true'])).parameters) == 1:
+            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x)
         else:
-            f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x, self.config['focus_ind'])
 
         y_train = f_true(x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
 
@@ -145,7 +150,7 @@ class CreateData():
 
 
 
-    @clean_bounds
+    @clean_1dbounds
     def create_valuation_data(self):
 
         d_in = self.config['d_in']
@@ -164,10 +169,10 @@ class CreateData():
             x_val[:, i] = self._equi_data(n_val, temp_x_min, temp_x_max)
 
         # adjust function based on given focus_ind 
-        if len(signature(self.config['f_true']).parameters) == 1:
-            f_true = lambda x: self.config['f_true'](x)
+        if len(signature(self._f_true_fm(self.config['f_true'])).parameters) == 1:
+            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x)
         else:
-            f_true = lambda x: self.config['f_true'](x, self.config['focus_ind'])
+            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x, self.config['focus_ind'])
             
         y_val = f_true(x_val) 
 
