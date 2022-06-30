@@ -7,14 +7,10 @@ import core_code.nn_model.util as nn_util
 
 
 
-# f_true functions
-def f(x):
-    return util.function_library('compositeSine')(x)
-
 config_function = {
     'd_in': 1, # >= 1
     'd_out': 7,
-    'f_true': f,
+    'f_true': 'compositeSine',
     'focus_ind': 0
 }
 
