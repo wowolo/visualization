@@ -52,7 +52,7 @@ class ExtendedModel(ModelCatalogue):
 
 
 
-    def train(self, x_train, y_train, loss_activity=None, **kwargs):
+    def train(self, x_train, y_train, loss_activity=None, x_val=None, y_val=None, figure_path=Path().cwd(), **kwargs):
 
         if isinstance(self.config_architecture['architecture_key'], type(None)):
             return None
@@ -73,7 +73,12 @@ class ExtendedModel(ModelCatalogue):
         max_entry = self.loss_activity.max()
         if min_entry < 0 or max_entry > max_loss:
             raise ValueError('The entries of the loss activity assign losses between {} and {} while only entries between 0 and {} are possible.'.format(min_entry, max_entry, max_loss))
-
+        bool_val_data = not(isinstance(x_val, type(None))) and not(isinstance(y_val, type(None)))
+        if bool_val_data:
+            if x_val.shape != x_train.shape:
+                raise ValueError('The shape of the x training data ({}) and the shape of the x validation data ({}) do not match.'.format(x_val.shape, x_train.shape))
+            if y_val.shape != y_train.shape:
+                raise ValueError('The shape of the y training data ({}) and the shape of the y validation data ({}) do not match.'.format(y_val.shape, y_train.shape))
 
         epochs = self.config_training['epochs']    
         
@@ -81,32 +86,52 @@ class ExtendedModel(ModelCatalogue):
         update = self._update_rule_fm(self.config_training['update_rule'])
         optimizer = update(self.parameters(), lr=self.config_training['learning_rate'])
         training_generators = DataGenerators(x_train, y_train, self.loss_activity, **self.config_training)
+        if bool_val_data:
+            val_generator = DataGenerators(x_val, y_val, self.loss_activity, **self.config_training)
         min_iter = min([training_generators[i].__len__() for i in range(len(training_generators))])
 
         self.loss_wout_reg = list(np.empty(epochs * min_iter)) 
         self.loss = list(np.empty_like(self.loss_wout_reg))
+        if bool_val_data:
+            self.val_loss = list(np.empty_like(self.loss_wout_reg))
+        else:
+            self.val_loss = None
         ind_loss = 0
 
         for epoch in range(epochs):
 
             # print('Epoch: ', epoch)
             data_retrievers = [iter(data_generator) for data_generator in training_generators]
+            if bool_val_data:
+                val_data_retrievers = [iter(data_generator) for data_generator in val_generator]
 
             for iteration in range(min_iter):
                 
                 loss = torch.tensor(0., requires_grad=True)
+                if bool_val_data:
+                    val_loss = torch.tensor(0., requires_grad=False)
 
                 for i in range(len(data_retrievers)):
 
-                    X, y, temp_loss_activity = next(data_retrievers[i])
+                    X, Y, temp_loss_activity = next(data_retrievers[i])
 
                     output = self.forward(X)
                     # compute loss based on config_training['criterions'] and loss activity
-                    for loss_selec in range(1, int(max(temp_loss_activity)) + 1):
-                        _ind = (temp_loss_activity == loss_selec)
-                        criterion = self._criterions_fm(self.config_training['criterions'][i])
-                        loss = loss + criterion(output[_ind], y[_ind])
-                    self.loss_wout_reg[ind_loss] = float(loss)
+                    for loss_selec in range(max(temp_loss_activity)):
+                        _ind = (temp_loss_activity == (loss_selec + 1))
+                        criterion = self._criterions_fm(self.config_training['criterions'][loss_selec])
+                        loss = loss + criterion(output[_ind], Y[_ind])
+
+                    if bool_val_data:
+                        X_val, Y_val, temp_val_loss_activity = next(val_data_retrievers[i])
+                        val_output = self.forward(X_val)
+                        # compute loss based on config_training['criterions'] and loss activity
+                        for loss_selec in range(max(temp_val_loss_activity)):
+                            _ind = (temp_val_loss_activity == (loss_selec + 1))
+                            criterion = self._criterions_fm(self.config_training['criterions'][loss_selec])
+                            val_loss = val_loss + criterion(val_output[_ind], Y_val[_ind])
+                
+                self.loss_wout_reg[ind_loss] = float(loss)
 
                 # add regularization terms to loss
                 reg = torch.tensor(0., requires_grad=True)
@@ -121,9 +146,30 @@ class ExtendedModel(ModelCatalogue):
                 loss.backward()
                 optimizer.step()
 
+
+                if bool_val_data:
+                    val_loss = val_loss + self.config_training['regularization_alpha'] * reg
+                    self.val_loss[ind_loss] = float(val_loss)
+
                 ind_loss += 1
             
             print('Loss in epoch {}: {}'.format(epoch, loss))
+        
+        if self.config_training['loss_plot']:
+            plt.figure()
+            plt.plot(self.loss_wout_reg, label='Training loss w/o regularization')
+            plt.plot(self.loss, label='Training loss with regularization')
+            n_col = 2
+            if bool_val_data:
+                plt.plot(self.val_loss, label='Validation loss with regularization')
+                n_col += 1
+            plt.title('Training - Loss Plot')
+            plt.xlabel('Step')
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.), fancybox=True, ncol=n_col)
+            plt.savefig(figure_path / 'loss_plot.png', bbox_inches="tight")
+            plt.close('all')
+            
+
 
 
 
@@ -139,14 +185,13 @@ class ExtendedModel(ModelCatalogue):
             'learning_rate': 0.0001,
             'update_rule': 'Adam', 
             'separate_loss_batching': True,
+            'loss_plot': True,
         }
 
         config_training = nn_util.create_config(kwargs, default_extraction_strings)
 
         if not(isinstance(config_training['criterions'], list)):
             config_training['criterions'] = [config_training['criterions']]
-
-        config_training = self._function_maker(config_training)
 
         return config_training
 

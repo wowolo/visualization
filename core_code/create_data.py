@@ -161,7 +161,7 @@ class CreateData():
         x_val = np.empty((n_val, d_in))
 
         for i in range(d_in):
-            # random evaluation points (possibly outside of [x_min, x_max])
+            # random validation points (possibly outside of [x_min, x_max])
             stretch = 1
             center = (x_max[i] + x_min[i]) * 0.5
             temp_x_min = center + stretch * (x_min[i] - center)

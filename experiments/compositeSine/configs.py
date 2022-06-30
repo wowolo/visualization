@@ -21,7 +21,7 @@ configs_data = {
     'noise_scale': .1,
     'x_min': -2,
     'x_max': 2,
-    'n_val': 512,
+    'n_val': 64 + 256,
 }
 configs_data.update(config_function)
 
@@ -29,7 +29,7 @@ configs_data.update(config_function)
 configs_architecture = {
     # architecture parameters
     'architecture_key': ['NTK'],
-    'depth': [3, 8],
+    'depth': 9,
     'width': 4096, # for NTK
     'bottleneck_width': 4096, # [16, 256, 512], # for Stack
     'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
@@ -49,9 +49,9 @@ configs_traininig = {
     #########
     'criterions': [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], #[[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
-    'epochs': 2048, #[1024, 4096], # 4096,
+    'epochs': 20, #2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': [0.00001, 5e-5, 2e-6, 8e-6],
+    'regularization_alpha': [0.00001],
     'regularization_ord': 2,
     'learning_rate': [0.001],
     #########

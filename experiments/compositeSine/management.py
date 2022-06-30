@@ -117,15 +117,20 @@ class ExperimentManager(BasicManager):
             x_val = x_val[ind_sort]
             y_val = y_val[ind_sort]
 
+            experiment_path = self.create_experiment_dir(experimentbatch_path, i) # numeric id i
+            figure_path = experiment_path / 'figures' # needed for loss plot from training
+            os.mkdir(figure_path)
+
             # train the model on the given data
             nn_model.train(
                 x_train, 
                 y_train,
                 loss_activity, 
+                x_val=x_val,
+                y_val=y_val,
+                figure_path=figure_path,
                 **config_training
             )
-
-            experiment_path = self.create_experiment_dir(experimentbatch_path, i) # numeric id i
 
             # create and save plots (unless turned off by config_custom)
             if config_custom['save_fig']:
@@ -134,8 +139,6 @@ class ExperimentManager(BasicManager):
                 # x1min = float(min(x_train[:,1]) - 0.3)
                 # x1max = float(max(x_train[:,1]) + 0.3)
                 # nn_model.plot2d(x_train, y_train, x0min, x0max, x1min, x1max, dirname=experiment_path / 'figures')
-                figure_path = experiment_path / 'figures'
-                os.mkdir(figure_path)
                 
                 for i in range(config_data['d_out']):
                     plt.figure()

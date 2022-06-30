@@ -7,4 +7,4 @@ manager = ExperimentManager(
     configs_traininig,
     configs_custom # custom configs for chosen ExperimentManager
 )
-manager.run()
+manager.run('test_lossplot')

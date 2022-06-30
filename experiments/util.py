@@ -71,19 +71,31 @@ class BasicManager():
 
     
 
-    def dict_to_file(self, dict, file_path, format='v'):
+    # def dict_to_file(self, dict, file_path, format='v'):
+    #     # format: 'v' or 'h'
+    #     with open(file_path, 'w') as file:
+    #         if format == 'v':
+    #             for key, val in dict.items():
+    #                 file.write('{}: {}\n'.format(key, val))
+    #         else:
+    #             json_dict = {key: self.make_jsonable(dict[key]) for key in dict.keys()}
+    #             file.write(json.dumps(json_dict))
+
+
+
+    def dict_to_file(self, dict_, file_path):
         # format: 'v' or 'h'
         with open(file_path, 'w') as file:
-            if format == 'v':
-                for key, val in dict.items():
-                    file.write('{}: {}\n'.format(key, val))
-            else:
-                json_dict = {key: self.make_jsonable(dict[key]) for key in dict.keys()}
-                file.write(json.dumps(json_dict))
+            json_dict = {key: self.make_jsonable(dict_[key]) for key in dict_.keys()}
+            file.write(json.dumps(json_dict))
 
 
 
-    # def file_to_dict()...
+    # reverse the dict to file method to create dict: separator ': ' for each line
+    def file_to_dict(self, file_path):
+        with open(file_path) as file:
+            dict_ = json.loads(file_path)
+        return dict_
     
     
 
@@ -166,3 +178,11 @@ class BasicManager():
         
         # return config_list_data, config_list_architecture, config_list_training
         return args_list_of_configs
+
+
+# def readin_model(weight_path, architecture_path):
+#     config_architecture = BasicManager.file_to_dict(architecture_path)
+#     # read the config file architecture -> dict
+#     # create nn_model
+#     nn_model.load(weight_path)
+#     return nn_model
