@@ -166,7 +166,7 @@ class ExtendedModel(ModelCatalogue):
             plt.title('Training - Loss Plot')
             plt.xlabel('Step')
             plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.), fancybox=True, ncol=n_col)
-            plt.savefig(figure_path / 'loss_plot.png', bbox_inches="tight")
+            plt.savefig(figure_path / 'loss_plot.jpg', bbox_inches="tight")
             plt.close('all')
             
 

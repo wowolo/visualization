@@ -93,8 +93,8 @@ class BasicManager():
 
     # reverse the dict to file method to create dict: separator ': ' for each line
     def file_to_dict(self, file_path):
-        with open(file_path) as file:
-            dict_ = json.loads(file_path)
+        with open(file_path, 'r') as file:
+            dict_ = json.load(file)
         return dict_
     
     

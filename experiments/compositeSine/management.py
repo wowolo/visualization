@@ -155,7 +155,7 @@ class ExperimentManager(BasicManager):
                     plt.plot(x_val.detach(), y_val.detach()[:,i], 'k-', label='True function')
                     plt.title('CompositeSine Experimen - Output dimension {}'.format(i))
                     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=2 + set_counter)
-                    plt.savefig(figure_path / 'fig_{}.png'.format(i), bbox_inches="tight")
+                    plt.savefig(figure_path / 'fig_{}.jpg'.format(i), bbox_inches="tight")
                     plt.close('all')
             
             # document the experiment within the experiment batch folder
@@ -167,12 +167,12 @@ class ExperimentManager(BasicManager):
         # allocate complete documentation writing within this method, i.e. ... + create dict_content + save_network_weights
         dict_content = {}
 
-        dict_content['config_data.txt'] = data.config
-        dict_content['nn_config_architecture.txt'] = nn_model.config_architecture
-        dict_content['nn_config_training.txt'] = nn_model.config_training
-        dict_content['config_custom.txt'] = config_custom
-        dict_content['loss_wout_reg.txt'] = nn_model.loss_wout_reg
-        dict_content['loss.txt'] = nn_model.loss
+        dict_content['config_data.json'] = data.config
+        dict_content['nn_config_architecture.json'] = nn_model.config_architecture
+        dict_content['nn_config_training.json'] = nn_model.config_training
+        dict_content['config_custom.json'] = config_custom
+        dict_content['loss_wout_reg.json'] = nn_model.loss_wout_reg
+        dict_content['loss.json'] = nn_model.loss
 
         for filename, content in dict_content.items():
 
@@ -211,5 +211,5 @@ class ExperimentManager(BasicManager):
             experiment_index_dict[experiment_path.name] = json_all_config
         
         # document experiment index file for whole batch
-        file_path = experimentbatch_path / 'experiment_index.txt'
+        file_path = experimentbatch_path / 'experiment_index.json'
         self.dict_to_file(experiment_index_dict, file_path)
