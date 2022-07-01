@@ -176,15 +176,20 @@ class ModelMethods(nn.Module):
         default_extraction_strings = {
             'd_in': None, 
             'd_out': None, 
-            'width': 64, 
-            'depth': 3, 
-            'a': .25, # allow array according to depth + make default mup
-            'b': .25, # allow array according to depth + make default mup
-            'c': .01, # allow array according to depth + make default mup
+            'width': 1024, 
+            'depth': 6, 
+            'list_a': [-.5] + [0 for i in range(4)] + [.5], # default: mup
+            'list_b': [.5 for i in range(6)], # default: mup
+            'c': 0, # default: mup
             'hidden_layer_activation': 'ReLU',
         }
         
         config_architecture = nn_util.create_config(kwargs, default_extraction_strings)
+
+        if isinstance(config_architecture['list_a'], int):
+            config_architecture['list_a'] = [config_architecture['list_a'] for i in range(config_architecture['depth'])]
+        if isinstance(config_architecture['list_b'], int):
+            config_architecture['list_b'] = [config_architecture['list_b'] for i in range(config_architecture['depth'])]
         
         return config_architecture
 
@@ -197,19 +202,19 @@ class ModelMethods(nn.Module):
         d_out = config_architecture['d_out']
         depth = config_architecture['depth']
         width = config_architecture['width']
-        a = config_architecture['a']
-        b = config_architecture['b']
+        list_a = config_architecture['list_a']
+        list_b = config_architecture['list_b']
 
         for i in range(depth):
             if depth == 1:
-                mod_list.append(abc_Layer(d_in, d_out, a, b))
+                mod_list.append(abc_Layer(d_in, d_out, list_a[i], list_b[i]))
             else:
                 if i == 0:
-                    mod_list.append(abc_Layer(d_in, width, a, b))
+                    mod_list.append(abc_Layer(d_in, width, list_a[i], list_b[i]))
                 elif i < depth - 1:
-                    mod_list.append(abc_Layer(width, width, a, b))
+                    mod_list.append(abc_Layer(width, width, list_a[i], list_b[i]))
                 else:
-                    mod_list.append(abc_Layer(width, d_out, a, b))
+                    mod_list.append(abc_Layer(width, d_out, list_a[i], list_b[i]))
 
         self.layers = nn.ModuleList(mod_list).double()
 

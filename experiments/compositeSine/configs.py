@@ -28,8 +28,8 @@ configs_data.update(config_function)
 # configs for model architecture
 configs_architecture = {
     # architecture parameters
-    'architecture_key': ['NTK'],
-    'depth': 9,
+    'architecture_key': ['abcMLP', 'NTK'],
+    'depth': 6,
     'width': 4096, # for NTK
     'bottleneck_width': 4096, # [16, 256, 512], # for Stack
     'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
@@ -40,6 +40,10 @@ configs_architecture = {
     'hidden_bottleneck_activation': 'Identity', #nn_util.identity_activation, # for Stack
     #########
     'hidden_layer_activation': 'ReLU', #torch.nn.ReLU, # for NTK
+    # for abcMLP
+    'list_a': [[-.5] + [0 for i in range(4)] + [.5]], # default: mup
+    'list_b': [[.5 for i in range(6)]], # default: mup
+    'c': 0, # default: mup
 }
 configs_architecture.update(config_function)
 
@@ -49,13 +53,13 @@ configs_traininig = {
     #########
     'criterions': [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], #[[nn_util.dimred_MSELoss([0]), nn_util.dimred_MSELoss(np.arange(1, 7))]],
     'shuffle': True,
-    'epochs': 2, #2048, #[1024, 4096], # 4096,
+    'epochs': 1024, #2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': [0.00001],
+    'regularization_alpha': 0,
     'regularization_ord': 2,
     'learning_rate': [0.001],
     #########
-    'update_rule': 'Adam', #torch.optim.Adam, 
+    'update_rule': 'SGD', #torch.optim.Adam, 
     'separate_loss_batching': True,
 }
 

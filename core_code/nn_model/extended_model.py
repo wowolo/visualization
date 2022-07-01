@@ -46,6 +46,11 @@ class ExtendedModel(ModelCatalogue):
     def __init__(self, **kwargs):
 
         super(ExtendedModel, self).__init__(**kwargs) # pass appropriate input to create architecture
+        
+        # attempt to set to gpu
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.to(device)
+        print(device)
 
         self.loss = []
         self.loss_wout_reg = []
@@ -100,7 +105,6 @@ class ExtendedModel(ModelCatalogue):
 
         for epoch in range(epochs):
 
-            # print('Epoch: ', epoch)
             data_retrievers = [iter(data_generator) for data_generator in training_generators]
             if bool_val_data:
                 val_data_retrievers = [iter(data_generator) for data_generator in val_generator]
@@ -153,7 +157,7 @@ class ExtendedModel(ModelCatalogue):
 
                 ind_loss += 1
             
-            print('Loss in epoch {}: {}'.format(epoch, loss))
+            # print('Loss in epoch {}: {}'.format(epoch, loss))
         
         if self.config_training['loss_plot']:
             plt.figure()

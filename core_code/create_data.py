@@ -16,7 +16,6 @@ import core_code.util as util
 class CreateData():
 
 
-
     @staticmethod
     def _equi_data(n_samples, x_min_i, x_max_i):
         return np.linspace(x_min_i, x_max_i , n_samples)
@@ -161,7 +160,7 @@ class CreateData():
         x_val = np.empty((n_val, d_in))
 
         for i in range(d_in):
-            # random validation points (possibly outside of [x_min, x_max])
+            # random validation points (possibly outside of [x_min, x_max]) - dependent on stretch
             stretch = 1
             center = (x_max[i] + x_min[i]) * 0.5
             temp_x_min = center + stretch * (x_min[i] - center)
