@@ -13,13 +13,14 @@
 ############################################################################
 
 # check argument
-if [ "$#" -ne 1 ]; then
-    echo "no argument: tag missing"
-	exit 0
-fi
+# if [ "$#" -ne 1 ]; then
+#     echo "no argument: tag missing"
+# 	exit 0
+# fi
+
+read experiment_name
 
 # make connection to euler
-ssh euler
 username=scheins
 # go to main directory and update via github
 main_dir=/cluster/home/$username/master_thesis/visualization
@@ -32,7 +33,7 @@ echo "start"
 echo "#######################################################"
 
 # ressource allocation
-max_time="03:10" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
+max_time="24:00" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
 n_core="1" # number of core (large value implies low priority)
 memory="65536" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
@@ -50,7 +51,7 @@ module load gcc/8.2.0 python_gpu/3.9.9
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
-bsub -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py
+bsub -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py experiment_name
 
 # display the current queue
 bbjobs
@@ -60,6 +61,4 @@ echo "#######################################################"
 echo "end"
 echo "#######################################################"
 
-\exit
-
-exit 0
+exit
