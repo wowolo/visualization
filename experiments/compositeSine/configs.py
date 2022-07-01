@@ -28,8 +28,8 @@ configs_data.update(config_function)
 # configs for model architecture
 configs_architecture = {
     # architecture parameters
-    'architecture_key': ['abcMLP', 'NTK'],
-    'depth': 6,
+    'architecture_key': ['Stack'],
+    'depth': 3,
     'width': 4096, # for NTK
     'bottleneck_width': 4096, # [16, 256, 512], # for Stack
     'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
@@ -55,9 +55,9 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 1024, #2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0,
+    'regularization_alpha': 0.01,
     'regularization_ord': 2,
-    'learning_rate': [0.001],
+    'learning_rate': [0.0001],
     #########
     'update_rule': 'SGD', #torch.optim.Adam, 
     'separate_loss_batching': True,

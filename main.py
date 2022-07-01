@@ -7,4 +7,4 @@ manager = ExperimentManager(
     configs_traininig,
     configs_custom # custom configs for chosen ExperimentManager
 )
-manager.run('test_abcMLP')
+manager.run('Stack_experiment')

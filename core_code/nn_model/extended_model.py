@@ -161,15 +161,22 @@ class ExtendedModel(ModelCatalogue):
         
         if self.config_training['loss_plot']:
             plt.figure()
-            plt.plot(self.loss_wout_reg, label='Training loss w/o regularization')
-            plt.plot(self.loss, label='Training loss with regularization')
-            n_col = 2
-            if bool_val_data:
-                plt.plot(self.val_loss, label='Validation loss with regularization')
-                n_col += 1
+            if self.config_training['regularization_alpha'] != 0:
+                plt.plot(self.loss_wout_reg, label='Training loss w/o regularization')
+                plt.plot(self.loss, label='Training loss with regularization')
+                n_col = 2
+                if bool_val_data:
+                    plt.plot(self.val_loss, label='Validation loss with regularization')
+                    n_col += 1
+            else:
+                plt.plot(self.loss, label='Training loss')
+                n_col = 1
+                if bool_val_data:
+                    plt.plot(self.val_loss, label='Validation loss')
+                    n_col += 1
             plt.title('Training - Loss Plot')
             plt.xlabel('Step')
-            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.), fancybox=True, ncol=n_col)
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.125), fancybox=True, ncol=n_col)
             plt.savefig(figure_path / 'loss_plot.jpg', bbox_inches="tight")
             plt.close('all')
             
