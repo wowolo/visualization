@@ -1,6 +1,9 @@
 # ignore env
 visual_env/
 
+# ignore bash_files
+bash_files/
+
 # ignore pychache, ipynb
 __pycache__/
 .ipynb_checkpoints/
@@ -16,6 +19,3 @@ storage/
 
 # ignore temp files
 temp_*
-
-# ignore bash_files
-bash_files/
