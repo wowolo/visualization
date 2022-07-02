@@ -28,9 +28,9 @@ configs_data.update(config_function)
 # configs for model architecture
 configs_architecture = {
     # architecture parameters
-    'architecture_key': ['Stack'],
-    'depth': 3,
-    'width': 4096, # for NTK
+    'architecture_key': ['abcMLP'],
+    'depth': 6,
+    'width': 4096, 
     'bottleneck_width': 4096, # [16, 256, 512], # for Stack
     'variable_width': 4096, #[1024, 2048, 4096, 8192], #], #  [16, 256, 2048, 8192], # for Stack
     'linear_skip_conn': False, # for Stack
@@ -41,8 +41,8 @@ configs_architecture = {
     #########
     'hidden_layer_activation': 'ReLU', #torch.nn.ReLU, # for NTK
     # for abcMLP
-    'list_a': [[-.5] + [0 for i in range(4)] + [.5]], # default: mup
-    'list_b': [[.5 for i in range(6)]], # default: mup
+    'list_a': [[0] + [0.5 for i in range(5)]], # default: mup
+    'list_b': [[0 for i in range(6)]], # default: mup
     'c': 0, # default: mup
 }
 configs_architecture.update(config_function)
@@ -55,7 +55,7 @@ configs_traininig = {
     'shuffle': True,
     'epochs': 1024, #2048, #[1024, 4096], # 4096,
     'batch_size': 64, #[64, 256],
-    'regularization_alpha': 0.0005,
+    'regularization_alpha': 0.,
     'regularization_ord': 2,
     'learning_rate': [0.001, 0.0001],
     #########
