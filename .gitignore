@@ -13,3 +13,9 @@ storage/
 
 # ignore ?random file? - no idea what it does
 .DS_Store
+
+# ignore temp files
+temp_*
+
+# ignore bash_files
+bash_files/
