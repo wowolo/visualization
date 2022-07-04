@@ -125,6 +125,8 @@ class ExtendedModel(ModelCatalogue):
                         _ind = (temp_loss_activity == (loss_selec + 1))
                         criterion = self._criterions_fm(self.config_training['criterions'][loss_selec])
                         loss = loss + criterion(output[_ind], Y[_ind])
+                        if loss < 0:
+                            print('oh no')
 
                     if bool_val_data:
                         X_val, Y_val, temp_val_loss_activity = next(val_data_retrievers[i])
@@ -158,27 +160,29 @@ class ExtendedModel(ModelCatalogue):
                 ind_loss += 1
             
             # print('Loss in epoch {}: {}'.format(epoch, loss))
-        
-        if self.config_training['loss_plot']:
-            plt.figure()
-            if self.config_training['regularization_alpha'] != 0:
-                plt.plot(self.loss_wout_reg, label='Training loss w/o regularization')
-                plt.plot(self.loss, label='Training loss with regularization')
-                n_col = 2
-                if bool_val_data:
-                    plt.plot(self.val_loss, label='Validation loss with regularization')
-                    n_col += 1
-            else:
-                plt.plot(self.loss, label='Training loss')
-                n_col = 1
-                if bool_val_data:
-                    plt.plot(self.val_loss, label='Validation loss')
-                    n_col += 1
-            plt.title('Training - Loss Plot')
-            plt.xlabel('Step')
-            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.125), fancybox=True, ncol=n_col)
-            plt.savefig(figure_path / 'loss_plot.jpg', bbox_inches="tight")
-            plt.close('all')
+
+            # training plot
+            if self.config_training['loss_plot']:
+                max_ind = (epoch + 1) * min_iter
+                plt.figure()
+                if self.config_training['regularization_alpha'] != 0:
+                    plt.plot(self.loss_wout_reg[:max_ind], label='Training loss w/o regularization')
+                    plt.plot(self.loss[:max_ind], label='Training loss with regularization')
+                    n_col = 2
+                    if bool_val_data:
+                        plt.plot(self.val_loss[:max_ind], label='Validation loss with regularization')
+                        n_col += 1
+                else:
+                    plt.plot(self.loss[:max_ind], label='Training loss')
+                    n_col = 1
+                    if bool_val_data:
+                        plt.plot(self.val_loss[:max_ind], label='Validation loss')
+                        n_col += 1
+                plt.title('Training - Loss Plot')
+                plt.xlabel('Step')
+                plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.125), fancybox=True, ncol=n_col)
+                plt.savefig(figure_path / 'loss_plot.jpg', bbox_inches="tight")
+                plt.close('all')
             
 
 

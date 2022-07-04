@@ -153,7 +153,7 @@ class ExperimentManager(BasicManager):
                             #     plt.plot(x_train_2, y_train_2[:,i], 'ko', markersize=8, label='Training data')
                     plt.plot(x_val.detach(), nn_model(x_val).detach()[:,i], 'r-', label='Neural Network')
                     plt.plot(x_val.detach(), y_val.detach()[:,i], 'k-', label='True function')
-                    plt.title('CompositeSine Experimen - Output dimension {}'.format(i))
+                    plt.title('CompositeSine Experiment - Output dimension {}'.format(i))
                     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=2 + set_counter)
                     plt.savefig(figure_path / 'fig_{}.jpg'.format(i), bbox_inches="tight")
                     plt.close('all')
