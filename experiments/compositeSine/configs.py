@@ -39,21 +39,21 @@ configs_architecture.update(config_function)
 
 # configs for model training
 configs_traininig = {
-    'criterions': ['MSELoss'], #[[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], 
+    'criterions': 'MSELoss', # [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], 
     'shuffle': True,
     'epochs': 1024, 
-    'batch_size': 64, 
+    'batch_size': [8, 16, 32], 
     'regularization_alpha': 0.0,
     'regularization_ord': 2,
-    'learning_rate': [0.0001],
+    'learning_rate': [0.1, 0.05, 0.01],
     'update_rule': ['SGD'],
     'separate_loss_batching': True,
 }
 
 # configs customised for the specific experiment setup
 configs_custom = {
-    'n_samples_per_loss': [[256]],
-    'x_max_per_loss': [[2]],
+    'n_samples_per_loss': [256],
+    'x_max_per_loss': [2],
     'save_fig': True,
     'torch_seed': 13,
     'numpy_seed': 33,

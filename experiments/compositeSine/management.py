@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
@@ -143,7 +144,19 @@ class ExperimentManager(BasicManager):
                 for i in range(config_data['d_out']):
                     plt.figure()
                     set_counter = 0
-                    for loss_num, (_, active_dim) in enumerate(config_training['criterions']):
+                    
+                    all_active = list(np.arange(config_data['d_out']))
+                    if isinstance(config_training['criterions'], str):
+                        criterions = [(config_training['criterions'], all_active)]
+                    else:
+                        criterions = []
+                        for criterion_elem in config_training['criterions']:
+                            if not(isinstance(criterion_elem, tuple)):
+                                criterions.append((criterion_elem, all_active))
+                            else:
+                                criterions.append(criterion_elem)
+
+                    for loss_num, (_, active_dim) in enumerate(criterions):
                         if i in active_dim:
                             plt.plot(x_train_list[loss_num], y_train_list[loss_num][:,i], 'o', color=grayscale_list[set_counter], markersize=3, label='Training data - Loss {}'.format(loss_num + 1))
                             set_counter = (set_counter + 1) % len(grayscale_list)

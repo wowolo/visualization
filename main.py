@@ -5,7 +5,7 @@ from experiments.compositeSine.configs import configs_data, configs_architecture
 try:
     experiment_name = sys.argv[1] 
 except IndexError:
-    experiment_name = 'abcNTK_nonfeature_experiment'
+    experiment_name = 'abcNTK_euler_experiment'
 
 manager = ExperimentManager(
     configs_data, 
