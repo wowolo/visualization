@@ -41,7 +41,7 @@ configs_architecture.update(config_function)
 configs_traininig = {
     'criterions': 'MSELoss', # [[('dimred_MSELoss', [0]),('dimred_MSELoss', list(np.arange(1, 7)))]], 
     'shuffle': True,
-    'epochs': 1024, 
+    'epochs': 1, 
     'batch_size': [8, 16, 32], 
     'regularization_alpha': 0.0,
     'regularization_ord': 2,
