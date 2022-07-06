@@ -54,6 +54,11 @@ class ExperimentManager(BasicManager):
             
             config[string] = item
         
+        if isinstance(config['n_samples_per_loss'], int):
+            config['n_samples_per_loss'] = [config['n_samples_per_loss']]
+        if isinstance(config['x_max_per_loss'], int):
+            config['x_max_per_loss'] = [config['x_max_per_loss']]
+            
         return config
 
 

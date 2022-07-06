@@ -49,7 +49,7 @@ module load gcc/8.2.0 python_gpu/3.9.9
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
-bsub -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py $tag
+bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py $tag
 
 # display the current queue
 bbjobs
