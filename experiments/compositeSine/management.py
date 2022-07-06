@@ -57,7 +57,7 @@ class ExperimentManager(BasicManager):
         if isinstance(config['n_samples_per_loss'], int):
             config['n_samples_per_loss'] = [config['n_samples_per_loss']]
         if isinstance(config['x_max_per_loss'], int):
-            config['x_max_per_loss'] = [config['x_max_per_loss']]
+            config['x_max_per_loss'] = [[config['x_max_per_loss']]]
             
         return config
 
@@ -71,8 +71,7 @@ class ExperimentManager(BasicManager):
         # run for given self.configs: grid_config_lists
         experiment_num = len(self.configs_data_list)
 
-        # might want to define complete configs at some point and check for them
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') # send all tensors to device, i.e. data in traininig and model
 
         # write initial nn_model config params
         experimentbatch_path = self.default_experimentbatch_dir(storage_path, experimentbatch_name)

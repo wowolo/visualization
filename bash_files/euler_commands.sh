@@ -35,7 +35,7 @@ max_time="24:00" # maximum time (hour:second") allocated for the job (max 120:00
 n_core="1" # number of core (large value implies low priority)
 memory="65536" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
-
+n_gpus=1
 
 # get the job name (${1} is the tag provided as argument)
 tag="${1}"
@@ -49,7 +49,7 @@ module load gcc/8.2.0 python_gpu/3.9.9
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
-bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch]" python /cluster/home/scheins/master_thesis/visualization/main.py $tag
+bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory,scratch=$scratch,ngpus_execl_p=${n_gpus}]" python /cluster/home/scheins/master_thesis/visualization/main.py $tag
 
 # display the current queue
 bbjobs

@@ -53,7 +53,7 @@ configs_traininig = {
 # configs customised for the specific experiment setup
 configs_custom = {
     'n_samples_per_loss': [[256]],
-    'x_max_per_loss': [2],
+    'x_max_per_loss': [[2]],
     'save_fig': True,
     'torch_seed': 13,
     'numpy_seed': 33,
