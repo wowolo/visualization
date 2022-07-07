@@ -48,9 +48,9 @@ class ExtendedModel(ModelCatalogue):
         super(ExtendedModel, self).__init__(**kwargs) # pass appropriate input to create architecture
         
         # attempt to set to gpu
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.to(device)
-        print(device)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.to(self.device)
+        print(self.device)
 
         self.loss = []
         self.loss_wout_reg = []

@@ -257,7 +257,7 @@ class ModelCatalogue(ModelMethods):
         self.config_training = {}
 
         self.initialize_architecture()
-        self.double()
+        self.device = None
         
         if report: 
             nn_util.report_config(self.config_architecture)
@@ -296,6 +296,8 @@ class ModelCatalogue(ModelMethods):
 
 
     def forward(self, x):
+
+        x = x.to(self.device)
 
         key = self.config_architecture['architecture_key']
 
