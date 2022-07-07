@@ -119,8 +119,8 @@ class ExperimentManager(BasicManager):
 
             # sort x_val
             ind_sort = torch.argsort(x_val.detach(), axis=0)[:, 0]
-            x_val = x_val[ind_sort]
-            y_val = y_val[ind_sort]
+            x_val = x_val[ind_sort].to(device)
+            y_val = y_val[ind_sort].to(device)
 
             experiment_path = self.create_experiment_dir(experimentbatch_path, i) # numeric id i
             figure_path = experiment_path / 'figures' # needed for loss plot from training
