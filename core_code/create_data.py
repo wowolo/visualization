@@ -1,15 +1,9 @@
 from inspect import signature
-from functools import wraps
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
 
 import core_code.util as util
-
-###############################################################################
-############# create data
-###############################################################################
-
-
+from core_code.util.default_config import init_config_data
+from core_code.util.config_extractions import _f_true_fm
 
 
 
@@ -43,78 +37,67 @@ class CreateData():
         data = np.concatenate((per_1, per_2))
         return data
 
-    
 
-    @staticmethod
-    def _f_true_fm(value):
-        f_true = util.function_library(value)
-        return f_true
+    def __init__(self, **config_data):
 
+        self.config_data, self.all_losses = init_config_data(**config_data)
+        self.all_losses = util.check_config(**config_data)
 
 
 
-    def clean_1dbounds(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            for bound_key in ['x_min', 'x_max']:
-                if isinstance(self.config[bound_key], int):
-                    self.config[bound_key] = [self.config[bound_key] for i in range(self.config['d_in'])]
-            return func(self, *args, **kwargs)
-        return wrapper
+    def create_data(self, type):
+
+        x = np.empty((0,self.config_data['d_in']))
+        y = np.empty((0,self.config_data['d_out']))
+        loss_activity = np.empty(0, dtype=int)
+
+        for loss_num in self.all_losses:
+            
+            loss_config = util.extract_lossconfig(self.config_data, loss_num)
+            loss_config = self.clean_1dbounds(loss_config)
+            _x, _y, _loss_activity = self.loss_data_creator(type, loss_config, loss_num)
+            x = np.concatenate([x, _x], axis=0)
+            y = np.concatenate([y, _y], axis=0)
+            loss_activity = np.concatenate([loss_activity, _loss_activity], axis=0, dtype=int)
 
 
-
-    def __init__(self, **kwargs):
-
-        self.config = self.init_config(**kwargs)
-        
-        # # create training and valuation data
-        # self.y_train, self.x_train = self.create_training_data()
-        # self.y_val, self.x_val = self.create_valuation_data()
-
-
-    
-    def init_config(self, **kwargs):
-
-        default_extraction_strings = {
-            'd_in': None, 
-            'd_out': None, 
-            'f_true': None,
-            'focus_ind': 0, 
-            'x_min': -1, 
-            'x_max': 1, 
-            'n_samples': 256, 
-            'noise_scale': .1,
-            'n_val': 128,
-            'data_generators': 'equi',
+        data_dict = {
+            'x': util.to_tensor(x), 
+            'y': util.to_tensor(y), 
+            'loss_activity': loss_activity
         }
-
-        config = {string: None for string in default_extraction_strings}
-
-        for string in default_extraction_strings:
-            
-            if string in kwargs.keys():
-                item = kwargs[string]
-            else:
-                item = default_extraction_strings[string]
-            
-            config[string] = item
         
-        return config
+        return data_dict
 
-    
 
-    @clean_1dbounds
-    def create_training_data(self):
-        
-        d_in = self.config['d_in']
-        n_samples = self.config['n_samples']
-        x_min = self.config['x_min']
-        x_max = self.config['x_max']
 
-        x_train = np.empty((n_samples, self.config['d_in']))
+    def loss_data_creator(self, type, loss_config, loss_num):
 
-        data_generators = self.config['data_generators']
+        if type == 'train':
+            d_in = loss_config['d_in']
+            n_samples = loss_config['n_train']
+            x_min = loss_config['x_min_train']
+            x_max = loss_config['x_max_train']
+            data_generators = loss_config['data_generators_train']
+            noise_scale = self.config_data['noise_scale']
+        elif type == 'val':
+            d_in = loss_config['d_in']
+            n_samples = loss_config['n_val']
+            x_min = loss_config['x_min_val']
+            x_max = loss_config['x_max_val']
+            data_generators = loss_config['data_generators_val']
+            noise_scale = 0
+        elif type == 'test':
+            d_in = loss_config['d_in']
+            n_samples = loss_config['n_test']
+            x_min = loss_config['x_min_test']
+            x_max = loss_config['x_max_test']
+            data_generators = loss_config['data_generators_test']
+            noise_scale = 0
+
+            
+        loss_x = np.empty((n_samples, d_in))
+
         if not(isinstance(data_generators, list)):
             data_generators = [data_generators]
         data_generators = data_generators[:d_in]
@@ -123,136 +106,34 @@ class CreateData():
             data_generators.append(data_generators[-1])
         
 
+        temp_func_dict = {
+            'equi': self._equi_data,
+            'uniform': self._uniform_data,
+            'periodic': self._periodic_data,
+            'noise': self._noise_data
+        }
+
         for d in range(d_in): # create data according to data generator in each dimension
 
-            if data_generators[d] == 'equi':
-                x_train[:, d] = self._equi_data(n_samples, x_min[d], x_max[d])
-            
-            elif data_generators[d] == 'uniform':
-                x_train[:, d] = self._uniform_data(n_samples, x_min[d], x_max[d])
-
-            elif data_generators[d] == 'periodic':
-                x_train[:, d] = self._periodic_data(n_samples, x_min[d], x_max[d])
-            
-            elif data_generators[d] == 'noise':
-                x_train[:, d] = self._noise_data(n_samples, x_min[d], x_max[d])
+            loss_x[:, d] = temp_func_dict[data_generators[d]](n_samples, x_min[d], x_max[d])
     
         # adjust function based on given focus_ind 
-        if len(signature(self._f_true_fm(self.config['f_true'])).parameters) == 1:
-            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x)
+        if len(signature(_f_true_fm(self.config_data['f_true'])).parameters) == 1:
+            f_true = lambda x: _f_true_fm(loss_config['f_true'])(x)
         else:
-            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x, self.config['focus_ind'])
+            f_true = lambda x: _f_true_fm(loss_config['f_true'])(x, loss_config['focus_ind'])
 
-        y_train = f_true(x_train) + np.random.normal(scale=1, size=(n_samples, self.config['d_out'])) * self.config['noise_scale']
+        loss_y = f_true(loss_x) + np.random.normal(scale=1, size=(n_samples, loss_config['d_out'])) * noise_scale
 
-        return util.to_tensor(x_train), util.to_tensor(y_train)
+        _loss_activity = np.ones(loss_x.shape[0], dtype=int) * loss_num
 
-
-
-    @clean_1dbounds
-    def create_valuation_data(self):
-
-        d_in = self.config['d_in']
-        n_val = self.config['n_val']
-        x_min = self.config['x_min']
-        x_max = self.config['x_max']
-
-        x_val = np.empty((n_val, d_in))
-
-        for i in range(d_in):
-            # random validation points (possibly outside of [x_min, x_max]) - dependent on stretch
-            stretch = 1
-            center = (x_max[i] + x_min[i]) * 0.5
-            temp_x_min = center + stretch * (x_min[i] - center)
-            temp_x_max = center + stretch * (x_max[i] - center)
-            x_val[:, i] = self._equi_data(n_val, temp_x_min, temp_x_max)
-
-        # adjust function based on given focus_ind 
-        if len(signature(self._f_true_fm(self.config['f_true'])).parameters) == 1:
-            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x)
-        else:
-            f_true = lambda x: self._f_true_fm(self.config['f_true'])(x, self.config['focus_ind'])
-            
-        y_val = f_true(x_val) 
-
-        return util.to_tensor(x_val), util.to_tensor(y_val)
-
+        return loss_x, loss_y, _loss_activity
     
 
-class CustomDataset(Dataset):
-
-    def __init__(self, x_train, y_train, loss_activity):
-        
-        self.x_train = x_train
-        self.y_train = y_train
-        self.loss_activity = loss_activity
-
-
-
-    def __len__(self):
-        return self.x_train.shape[0]
-
-
-
-    def __getitem__(self, idx):
-        return self.x_train[idx], self.y_train[idx], self.loss_activity[idx]
-
-
-
-def DataGenerators(x_train, y_train, loss_activity, **kwargs):
-
-    # check for tuple input -> loss activity
-
-    allowed_keys = list(set(['batch_size', 'shuffle']).intersection(kwargs.keys()))
-    dataloader_dict = {key: kwargs[key] for key in allowed_keys}
-    dataloader_dict['batch_size']  = util.dict_extract(dataloader_dict, 'batch_size', 64)
-    dataloader_dict['shuffle']  = util.dict_extract(dataloader_dict, 'shuffle', True)
-
-    bool_separate_loss_batching = util.dict_extract(kwargs, 'separate_loss_batching', True) # default value
-    bool_print_datagen_config = util.dict_extract(kwargs, 'print_datagen_config', True) # default value
-
-    # structure the generator by shuffle and separate_loss_batching
-    if bool_separate_loss_batching:
-        # determine the ratios based on given loss_activity and “total” batch size
-        _total_activities = [(loss_activity == i).sum() for i in range(1, int(loss_activity.max()) + 1)]
-        _ratios = [float(_total_activities[i] / sum(_total_activities)) for i in range(len(_total_activities))]
-        _max_ratio = np.argmax(_ratios)
-
-        # guarantee that batch size is sufficiently large to sample according to non-zero ratios
-        _min_batch_size = sum([ratio > 0 for ratio in _ratios])
-        if dataloader_dict['batch_size'] < _min_batch_size:
-            raise ValueError("Since 'separate_loss_batching' is True and the loss_activity indicates that {} losses are used we need a total 'batch_size' of at least {}.".format(_min_batch_size, _min_batch_size))
-        
-        _batch_sizes = [max(1, int(ratio * dataloader_dict['batch_size'])) for ratio in _ratios]
-        _batch_sizes[_max_ratio] = dataloader_dict['batch_size'] - sum(_batch_sizes[:_max_ratio] + _batch_sizes[_max_ratio+1:])
-        _ind_lossdatas = [(loss_activity == i) for i in range(1, int(loss_activity.max()) + 1)]
-        _dataset_partitions = [CustomDataset(x_train[_ind_lossdatas[i]], y_train[_ind_lossdatas[i]], loss_activity[_ind_lossdatas[i]]) for i in range(len(_ind_lossdatas))]
-        data_generators = [DataLoader(_dataset_partitions[i], batch_size=_batch_sizes[i], shuffle=dataloader_dict['shuffle']) for i in range(len(_ind_lossdatas))]
-        
-        if bool_print_datagen_config:
-            # print the configuration with ratios
-            min_iter =  min([data_generators[i].__len__() for i in range(len(data_generators))])
-            print('The following configuration has been used for the construction of the training loops:')
-            print('Data partition based on losses: {}'.format(bool_separate_loss_batching))
-            print('Number of losses considered: {}'.format(int(loss_activity.max())))
-            print('Data ratio for each partition: {}'.format(_ratios))
-            print('Total batch size: {}'.format(dataloader_dict['batch_size']))
-            print('Derived sub-batch sizes for each partition: {}'.format(_batch_sizes))
-            print('Number of iterations in one epoch: {}'.format(min_iter))
-            print('Shuffle: {}'.format(dataloader_dict['shuffle']))
-
-    
-    else:
-        dataset = CustomDataset(x_train, y_train, loss_activity)
-        data_generators =  [DataLoader(dataset, **dataloader_dict)]
-        if bool_print_datagen_config:
-            # print the configuration with ratios
-            min_iter =  min([data_generators[i].__len__() for i in range(len(data_generators))])
-            print('The following configuration has been used for the construction of the training loops:')
-            print('Data partition based on losses: {}'.format(bool_separate_loss_batching))
-            print('Number of losses considered: {}'.format(int(loss_activity.max())))
-            print('Total batch sizes: {}'.format(dataloader_dict['batch_size']))
-            print('Number of iterations in one epoch: {}'.format(min_iter))
-            print('Shuffle: {}'.format(dataloader_dict['shuffle']))
-
-    return data_generators
+    # TODO make at initialization 
+    @staticmethod
+    def clean_1dbounds(config_data):
+        for bound_key in ['x_min_train', 'x_max_train', 'x_min_val', 'x_max_val', 'x_min_test', 'x_max_test']:
+            if isinstance(config_data[bound_key], int):
+                config_data[bound_key] = [config_data[bound_key] for i in range(config_data['d_in'])]
+        return config_data

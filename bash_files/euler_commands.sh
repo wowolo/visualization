@@ -45,7 +45,7 @@ log="${tag}_out.txt"
 err="${tag}_error.txt"
 
 # load python environment specified by second input
-module load gcc/8.2.0 python_gpu/3.9.9
+module load gcc/8.2.0 python_gpu/3.9.9 eth_proxy
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
