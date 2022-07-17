@@ -1,10 +1,11 @@
 import sys
 # from experiments.compositeSine.management import ExperimentManager
 from experiments.compositeSine.configs import configs_data, configs_architecture, configs_training, configs_custom
+from experiments.compositeSine.logging_callback import LoggingCallback #, logging_callback
 
 from core_code.create_data import CreateData
 from core_code.create_model import CreateModel
-from core_code.lightning_model import DataModule, LightningModel
+from core_code.lightning_model import LightningModel
 
 import wandb
 from pytorch_lightning.loggers import WandbLogger
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     try:
         experiment_name = sys.argv[1] 
     except IndexError:
-        experiment_name = 'abcNTK_euler_experiment'
+        experiment_name = 'Stack_experiment_1'
 
     wandb.login()
     logger = WandbLogger(
@@ -21,15 +22,12 @@ if __name__ == '__main__':
         name=experiment_name, 
         log_model=True
     )
-    logger.experiment.config.update(configs_data)
-    logger.experiment.config.update(configs_architecture)
-    logger.experiment.config.update(configs_training)
 
     data = CreateData(**configs_data)
     torch_model = CreateModel(**configs_architecture)
     # datamodule = DataModule(data, **configs_training)
     model = LightningModel(torch_model, **configs_training)
-    model.fit(data, logger=logger)
+    model.fit(data, logger=logger, callbacks=[LoggingCallback(*data.create_data('train').values(), data.config_data)])
 
     # data_module = DataModule(data, **configs_training)
     # trainer = Trainer(

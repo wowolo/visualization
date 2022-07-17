@@ -1,7 +1,7 @@
 from inspect import signature
 import numpy as np
 
-import core_code.util as util
+import core_code.util.helpers as util
 from core_code.util.default_config import init_config_data
 from core_code.util.config_extractions import _f_true_fm
 
@@ -40,8 +40,7 @@ class CreateData():
 
     def __init__(self, **config_data):
 
-        self.config_data, self.all_losses = init_config_data(**config_data)
-        self.all_losses = util.check_config(**config_data)
+        self.config_data, self.all_tasks = init_config_data(**config_data)
 
 
 
@@ -49,60 +48,60 @@ class CreateData():
 
         x = np.empty((0,self.config_data['d_in']))
         y = np.empty((0,self.config_data['d_out']))
-        loss_activity = np.empty(0, dtype=int)
+        task_activity = np.empty(0, dtype=int)
 
-        for loss_num in self.all_losses:
+        for task_num in self.all_tasks:
             
-            loss_config = util.extract_lossconfig(self.config_data, loss_num)
-            loss_config = self.clean_1dbounds(loss_config)
-            _x, _y, _loss_activity = self.loss_data_creator(type, loss_config, loss_num)
+            task_config = util.extract_taskconfig(self.config_data, task_num)
+            task_config = self._clean_1dbounds(task_config)
+            _x, _y, _task_activity = self.task_data_creator(type, task_config, task_num)
             x = np.concatenate([x, _x], axis=0)
             y = np.concatenate([y, _y], axis=0)
-            loss_activity = np.concatenate([loss_activity, _loss_activity], axis=0, dtype=int)
+            task_activity = np.concatenate([task_activity, _task_activity], axis=0, dtype=int)
 
 
         data_dict = {
             'x': util.to_tensor(x), 
             'y': util.to_tensor(y), 
-            'loss_activity': loss_activity
+            'task_activity': task_activity
         }
         
         return data_dict
 
 
 
-    def loss_data_creator(self, type, loss_config, loss_num):
+    def task_data_creator(self, type, task_config, task_num):
 
         if type == 'train':
-            d_in = loss_config['d_in']
-            n_samples = loss_config['n_train']
-            x_min = loss_config['x_min_train']
-            x_max = loss_config['x_max_train']
-            data_generators = loss_config['data_generators_train']
+            d_in = task_config['d_in']
+            n_samples = task_config['n_train']
+            x_min = task_config['x_min_train']
+            x_max = task_config['x_max_train']
+            data_generators = task_config['data_generators_train']
             noise_scale = self.config_data['noise_scale']
         elif type == 'val':
-            d_in = loss_config['d_in']
-            n_samples = loss_config['n_val']
-            x_min = loss_config['x_min_val']
-            x_max = loss_config['x_max_val']
-            data_generators = loss_config['data_generators_val']
+            d_in = task_config['d_in']
+            n_samples = task_config['n_val']
+            x_min = task_config['x_min_val']
+            x_max = task_config['x_max_val']
+            data_generators = task_config['data_generators_val']
             noise_scale = 0
         elif type == 'test':
-            d_in = loss_config['d_in']
-            n_samples = loss_config['n_test']
-            x_min = loss_config['x_min_test']
-            x_max = loss_config['x_max_test']
-            data_generators = loss_config['data_generators_test']
+            d_in = task_config['d_in']
+            n_samples = task_config['n_test']
+            x_min = task_config['x_min_test']
+            x_max = task_config['x_max_test']
+            data_generators = task_config['data_generators_test']
             noise_scale = 0
 
             
-        loss_x = np.empty((n_samples, d_in))
+        task_x = np.empty((n_samples, d_in))
 
         if not(isinstance(data_generators, list)):
             data_generators = [data_generators]
         data_generators = data_generators[:d_in]
 
-        if len(data_generators) < d_in: # default: fill missing data generators with last entry
+        while len(data_generators) < d_in: # default: fill missing data generators with last entry
             data_generators.append(data_generators[-1])
         
 
@@ -115,24 +114,20 @@ class CreateData():
 
         for d in range(d_in): # create data according to data generator in each dimension
 
-            loss_x[:, d] = temp_func_dict[data_generators[d]](n_samples, x_min[d], x_max[d])
+            task_x[:, d] = temp_func_dict[data_generators[d]](n_samples, x_min[d], x_max[d])
     
-        # adjust function based on given focus_ind 
-        if len(signature(_f_true_fm(self.config_data['f_true'])).parameters) == 1:
-            f_true = lambda x: _f_true_fm(loss_config['f_true'])(x)
-        else:
-            f_true = lambda x: _f_true_fm(loss_config['f_true'])(x, loss_config['focus_ind'])
+        f_true = _f_true_fm(task_config['f_true'])
 
-        loss_y = f_true(loss_x) + np.random.normal(scale=1, size=(n_samples, loss_config['d_out'])) * noise_scale
+        task_y = f_true(task_x) + np.random.normal(scale=1, size=(n_samples, task_config['d_out'])) * noise_scale
 
-        _loss_activity = np.ones(loss_x.shape[0], dtype=int) * loss_num
+        _task_activity = np.ones(task_x.shape[0], dtype=int) * task_num
 
-        return loss_x, loss_y, _loss_activity
+        return task_x, task_y, _task_activity
     
 
-    # TODO make at initialization 
+
     @staticmethod
-    def clean_1dbounds(config_data):
+    def _clean_1dbounds(config_data):
         for bound_key in ['x_min_train', 'x_max_train', 'x_min_val', 'x_max_val', 'x_min_test', 'x_max_test']:
             if isinstance(config_data[bound_key], int):
                 config_data[bound_key] = [config_data[bound_key] for i in range(config_data['d_in'])]

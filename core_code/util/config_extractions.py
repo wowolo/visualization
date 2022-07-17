@@ -49,3 +49,27 @@ def _update_rule_fm(value):
         'Adam': torch.optim.Adam,
         'SGD': torch.optim.SGD,
     }[value]
+
+
+
+class identity_activation(torch.nn.Module): # currently implemented as Identity
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, x):
+        return x
+
+
+def _hidden_bottleneck_activation_fm(string):
+    return {
+        'Identity': identity_activation,
+        'ReLU': torch.nn.ReLU,
+    }[string]
+
+
+
+def _hidden_layer_activation_fm(string):
+    return {
+        'Identity': identity_activation,
+        'ReLU': torch.nn.ReLU,
+    }[string]

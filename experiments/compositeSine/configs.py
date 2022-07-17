@@ -1,17 +1,16 @@
 import numpy as np
 
-# loss are enumerated starting with 0
+# task are enumerated starting with 0
 
 config_function = {
-    'd_in': 1, 
-    'd_out': 7,
+    'd_in': 1, # one d_in value across all tasks, due to NN architecture
+    'd_out': 7, # one d_out value across all tasks, due to NN architecture
     'f_true': 'compositeSine',
-    'focus_ind': 0
 }
 
 # configs for model architecture
 configs_architecture = {
-    'architecture_key': 'abcMLP',
+    'architecture_key': 'Stack',
     'depth': 6,
     'width': 4096, 
     'bottleneck_width': 4096, # for Stack
@@ -30,15 +29,15 @@ configs_architecture.update(config_function)
 
 # configs for data creation
 configs_data = {
-    #### (potentially) loss specific ####
-    'n_train': {'loss_0': 64, 'loss_1': 256},
+    #### (potentially) task specific ####
+    'n_train': {'task_0': 128, 'task_1': 512},
     'noise_scale': .1,
     'x_min_train': -2,
-    'x_max_train': {'loss_0': 0, 'loss_1': 2},
-    'n_val': {'loss_0': 64, 'loss_1': 0},
-    'x_min_val': 0,
+    'x_max_train': {'task_0': 0, 'task_1': 2},
+    'n_val': {'task_0': 512, 'task_1': 512},
+    'x_min_val': -2,
     'x_max_val': 2,
-    'n_test': {'loss_0': 64, 'loss_1': 256},
+    'n_test': {'task_0': 64, 'task_1': 256},
     'x_min_test': -2,
     'x_max_test': 2,
 }
@@ -46,15 +45,15 @@ configs_data.update(config_function)
 
 # configs for model training
 configs_training = {
-    'epochs': 64, #024, 
-    'batch_size': 128, 
-    'data_loss_batching': True,
-    'learning_rate': 0.01,
+    'epochs': 512, #024, 
+    'batch_size': 64, 
+    'data_task_batching': True,
+    'learning_rate': 0.005,
     'update_rule': 'SGD',
-    'regularization_alpha': 0.0,
+    'regularization_alpha': 0.1,
     'regularization_ord': 2,
-    #### (potentially) loss specific ####
-    'criterion': {'loss_0': ('dimred_MSELoss', [0]), 'loss_1': ('dimred_MSELoss', list(np.arange(1, 7)))}, 
+    #### (potentially) task specific ####
+    'criterion': {'task_0': ('dimred_MSELoss', [0]), 'task_1': ('dimred_MSELoss', list(np.arange(1, 7)))}, 
     'shuffle': True,
 }
 

@@ -1,6 +1,5 @@
 import torch
-import core_code.util as util
-import core_code.model_lib.util as nn_util
+import core_code.util.config_extractions as util
 from core_code.util.default_config import init_config_abcMLP
 
 
@@ -91,7 +90,7 @@ class NNModel(torch.nn.Module):
     def forward(self, x):
 
         for layer in self.layers[:-1]:
-            activation = nn_util._hidden_layer_activation_fm(self.config_architecture['hidden_layer_activation'])
+            activation = util._hidden_layer_activation_fm(self.config_architecture['hidden_layer_activation'])
             x = activation()(layer(x))
         
         x = self.layers[-1](x)

@@ -6,9 +6,9 @@ from core_code.util.helpers import create_config, check_config
 def _make_init_config(default_extraction_strings, **kwargs):
     
     config_data = create_config(kwargs, default_extraction_strings)
-    all_losses = check_config(config_data)
+    all_tasks = check_config(**config_data)
     
-    return config_data, all_losses
+    return config_data, all_tasks
 
 
 
@@ -18,7 +18,6 @@ def init_config_data(**kwargs):
         'd_in': None, 
         'd_out': None, 
         'f_true': None,
-        'focus_ind': 0, 
         'n_train': 256, 
         'x_min_train': -1, 
         'x_max_train': 1, 
@@ -49,8 +48,7 @@ def init_config_training(**kwargs):
         'regularization_ord': 2,
         'learning_rate': 0.0001,
         'update_rule': 'Adam', 
-        'data_loss_batching': True,
-        'loss_plot': True,
+        'data_task_batching': True,
     }
 
     return _make_init_config(default_extraction_strings, **kwargs)
@@ -71,7 +69,7 @@ def init_config_abcMLP(**kwargs):
         'hidden_layer_activation': 'ReLU',
     }
     
-    return _make_init_config(default_extraction_strings, **kwargs)
+    return _make_init_config(default_extraction_strings, **kwargs)[0] # task activity not needed
 
 
 
@@ -88,7 +86,7 @@ def init_config_Stack(**kwargs):
         'linear_skip_conn': False,
         'linear_skip_conn_width': 32,
         'hidden_bottleneck_activation': 'Identity',
-        'hidden_bottleneck_activation': 'ReLU',
+        'hidden_layer_activation': 'ReLU',
     }
     
-    return _make_init_config(default_extraction_strings, **kwargs)
+    return _make_init_config(default_extraction_strings, **kwargs)[0] # task activity not needed

@@ -47,41 +47,41 @@ def create_config(kwargs, default_extraction_strings):
 
 
 def check_config(**kwargs):
-    all_losses = set()
-    # check values either non dict or dict with loss_#num format
+    all_tasks = set()
+    # check values either non dict or dict with task_#num format
     # + check that values
     for val in kwargs.values():
         temp_set = set()
         if isinstance(val, dict):
             for key in val.keys():
                 sep_key = key.split('_')
-                if (len(sep_key) != 2) or (sep_key[0] != 'loss') or (sep_key[1] != str(int(sep_key[1]))):
-                    raise ValueError('The format in the configuration is invalid.')
-                num_loss = int(sep_key[1])
-                temp_set.update({num_loss})
-        if len(all_losses) == 0:
-            all_losses = temp_set
+                if (len(sep_key) != 2) or (sep_key[0] != 'task') or (sep_key[1] != str(int(sep_key[1]))):
+                    raise ValueError('The format of the configuration is invalid.')
+                num_task = int(sep_key[1])
+                temp_set.update({num_task})
+        if len(all_tasks) == 0:
+            all_tasks = temp_set
         elif len(temp_set) > 0:
-            assert all_losses == temp_set
+            assert all_tasks == temp_set
 
-    if len(all_losses) == 0:
-        all_losses = {0}
+    if len(all_tasks) == 0:
+        all_tasks = {0}
 
-    return all_losses
+    return all_tasks
 
 
 
-def extract_lossconfig(config, loss):
-        loss_config = dict.fromkeys(config.keys())
-        loss_key = 'loss_' + str(loss)
+def extract_taskconfig(config, task_num):
+        task_config = dict.fromkeys(config.keys())
+        task_key = 'task_' + str(int(task_num))
 
-        for key in loss_config.keys():
+        for key in task_config.keys():
             value = config[key]
             if isinstance(value, dict):
-                value = value[loss_key]
-            loss_config[key] = value
+                value = value[task_key]
+            task_config[key] = value
 
-        return loss_config
+        return task_config
 
 
 
