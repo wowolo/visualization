@@ -17,3 +17,5 @@ storage/
 # ignore temp files
 temp_*
 temp/
+visualization/
+wandb/
