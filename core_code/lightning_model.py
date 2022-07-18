@@ -82,7 +82,7 @@ class LightningModel(pl.LightningModule):
 
         # log the configurations
         if trainer.global_rank == 0:
-            logger.experiment.config.update(data_module.config_data)
+            logger.experiment.config.update(data_module.data.config_data)
             logger.experiment.config.update(self.model.config_architecture)
             logger.experiment.config.update(self.config_training)
             logger.experiment.config.update(config_trainer)
