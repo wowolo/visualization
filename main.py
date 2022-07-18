@@ -5,6 +5,7 @@ from experiments.compositeSine.configs import configs_data, configs_architecture
 
 
 class StoreDict(argparse.Action):
+
     def __call__(self, parser, namespace, values, option_string=None):
         
         kv = {}
@@ -50,9 +51,12 @@ class StoreDict(argparse.Action):
         
         return v
 
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--experimentbatch_name', type=str)
 parser.add_argument('--config_trainer', action=StoreDict, nargs='*')
+
 
 
 def main():
@@ -66,8 +70,8 @@ def main():
     config_trainer = args.config_trainer
     if isinstance(config_trainer, type(None)):
         config_trainer = {}
-        
-    # config_trainer['fast_dev_run'] = True ######tmp
+
+    config_trainer['fast_dev_run'] = True ######tmp
 
     manager = Manager(
         configs_data, 

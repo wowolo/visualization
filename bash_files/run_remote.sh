@@ -8,7 +8,7 @@ fi
 
 # update experiments files on git
 git add ./experiments/*
-git commit -m "update experiments for running '${1}'"
+git commit -m "update experiments for running '${1}' on Euler cluster"
 git push origin master
 
 # makes ssh connection and execute euler commands
