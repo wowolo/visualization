@@ -45,7 +45,7 @@ config_trainer=(
     accelerator:auto
     strategy:ddp
     devices:auto
-    auto_select_gpus:True
+    auto_select_gpus:False
     deterministic:False
     # default_root_dir
     # auto_lr_find:False
