@@ -47,7 +47,7 @@ class Stack_Core(torch.nn.Module):
 
     def forward(self, x):
 
-        activation = util._hidden_layer_activation_fm(self.hidden_bottleneck_activation)
+        activation = util._hidden_layer_activation_fm(self.hidden_layer_activation)
         hidden_input = activation()(self.linear_1(x))
 
         if self.skip_conn:

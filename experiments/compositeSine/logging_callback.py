@@ -65,7 +65,7 @@ class LoggingCallback(Callback):
     ) -> None:
         with torch.no_grad():
             _x, _y, _task_activity = pl_module._retrieve_batch_data(batch)
-            data_len = _x.shape[0]
+            data_len = torch.Tensor(_x.shape[0])
             
             self.state_train['data_len'].append(data_len)
             self.state_train['loss'].append(outputs['loss'])
@@ -83,9 +83,9 @@ class LoggingCallback(Callback):
     ) -> None:
         with torch.no_grad():
             _x, _y, _task_activity = pl_module._retrieve_batch_data(batch)
-            data_len = _x.shape[0]
+            data_len = torch.Tensor(_x.shape[0])
             
-            self.state_train['data_len'].append(data_len)
+            self.state_val['data_len'].append(data_len)
     
             _preds = outputs['preds']
 
@@ -116,7 +116,7 @@ class LoggingCallback(Callback):
     ) -> None:
         # (data) weighted epoch loss
         data_len = self.state_train['data_len']
-        epoch_loss = torch.sum([self.state_train['loss'][i] * data_len[i] for i in range(len(data_len))]) / torch.sum(data_len)
+        epoch_loss = torch.sum(torch.Tensor([self.state_train['loss'][i] * data_len[i] for i in range(len(data_len))])) / torch.sum(torch.Tensor(data_len))
         
         trainer.logger.experiment.log({'train/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
 
@@ -131,7 +131,7 @@ class LoggingCallback(Callback):
     ) -> None: 
         # (data) weighted epoch loss
         data_len = self.state_val['data_len']
-        epoch_loss = torch.sum([self.state_val['loss'][i] * data_len[i] for i in range(len(data_len))]) / torch.sum(data_len)
+        epoch_loss = torch.sum(torch.Tensor([self.state_val['loss'][i] * data_len[i] for i in range(len(data_len))])) / torch.sum(torch.Tensor(data_len))
         
         trainer.logger.experiment.log({'val/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
         

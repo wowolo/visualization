@@ -14,7 +14,7 @@ if __name__ == '__main__':
     try:
         experiment_name = sys.argv[1] 
     except IndexError:
-        experiment_name = 'Stack_experiment_1'
+        experiment_name = 'Stack_experiment_2'
 
     wandb.login()
     logger = WandbLogger(
