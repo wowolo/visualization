@@ -21,10 +21,11 @@ fi
 tag="${1}"
 
 username=scheins
+project_path=/cluster/home/$username/master_thesis/visualization
+python_env=visual_env
 
 # go to main directory and update via github
-main_dir=/cluster/home/$username/master_thesis/visualization
-cd $main_dir
+cd $project_path
 git stash
 git pull origin master
 
@@ -40,7 +41,9 @@ scratch="0" # disk space (in MB) for temporary data per core
 n_gpus=8
 
 # set trainer configurations - partially implied by ressource allocation (do not decouple)
-config_trainer = (
+config_trainer=(
+    logger:False
+    callbacks:False
     accelerator:auto
     strategy:ddp
     devices:auto
@@ -49,7 +52,7 @@ config_trainer = (
     # default_root_dir
     # auto_lr_find:False
     # amp_backend
-    fast_dev_run:False
+    fast_dev_run:True
     # precision
     enable_progress_bar:False
     max_epochs:512
@@ -62,10 +65,10 @@ err="${tag}_error.txt"
 
 # load python environment specified by second input
 module load gcc/8.2.0 python_gpu/3.9.9 eth_proxy
-source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
+source $project_path/$python_env/bin/activate
 
 # submit the job
-bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory, ngpus_excl_p=$n_gpus]" python /cluster/home/scheins/master_thesis/visualization/main.py --experimentbatch_name $tag --config_trainer ${config_trainer[@]}
+bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory, ngpus_excl_p=$n_gpus]" python $project_path/main.py --experimentbatch_name $tag --config_trainer ${config_trainer[@]}
 
 # display the current queue
 bbjobs

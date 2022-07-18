@@ -71,7 +71,7 @@ def main():
     if isinstance(config_trainer, type(None)):
         config_trainer = {}
 
-    config_trainer['fast_dev_run'] = True ######tmp
+    # config_trainer['fast_dev_run'] = True ######tmp
 
     manager = Manager(
         configs_data, 

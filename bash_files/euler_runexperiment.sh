@@ -28,7 +28,6 @@ n_core="1" # number of core (large value implies low priority)
 memory="65536" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
 
-
 # get the job name (${1} is the tag provided as argument)
 tag="${1}"
 
@@ -37,7 +36,7 @@ log="${tag}_out.txt"
 err="${tag}_error.txt"
 
 # load python environment specified by second input
-module load gcc/8.2.0 python_gpu/3.9.9
+module load gcc/8.2.0 python_gpu/3.9.9 eth_proxy
 source /cluster/home/scheins/master_thesis/visualization/visual_env/bin/activate
 
 # submit the job
