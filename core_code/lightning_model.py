@@ -117,9 +117,9 @@ class LightningModel(pl.LightningModule):
 
     
     def _retrieve_batch_data(self, batch):
-        x = [].cpu()
-        y = [].cpu()
-        task_activity = [].cpu()
+        x = []
+        y = []
+        task_activity = []
 
         batch_keys = list(batch.keys())
 
