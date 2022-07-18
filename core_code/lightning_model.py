@@ -94,14 +94,14 @@ class LightningModel(pl.LightningModule):
     def _compute_combined_taskloss(self, batch, bool_training=True): # convenience function used in the step methods
         
         x, y, task_activity = self._retrieve_batch_data(batch)
-        preds = self.forward(x)
+        preds = self.forward(x).cpu()
         
-        if not(bool_training):
+        if not bool_training:
             return {'preds': preds}
 
         else:
             # compute loss based on task configurations 
-            loss = torch.zeros((1), requires_grad=True)
+            loss = torch.zeros((1), requires_grad=True).cpu()
             unique_activities = torch.unique(task_activity).int()
 
             for task_num in unique_activities:
@@ -117,9 +117,9 @@ class LightningModel(pl.LightningModule):
 
     
     def _retrieve_batch_data(self, batch):
-        x = []
-        y = []
-        task_activity = []
+        x = [].cpu()
+        y = [].cpu()
+        task_activity = [].cpu()
 
         batch_keys = list(batch.keys())
 
@@ -128,9 +128,9 @@ class LightningModel(pl.LightningModule):
             _x, _y, _task_activity = batch[task_key]
 
             # concatenate the data to use in outputs
-            x.append(_x)
-            y.append(_y)
-            task_activity.append(_task_activity)
+            x.append(_x.cpu())
+            y.append(_y.cpu())
+            task_activity.append(_task_activity.cpu())
 
         x = torch.concat(x)
         y = torch.concat(y)
