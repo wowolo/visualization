@@ -12,12 +12,10 @@ class StoreDict(argparse.Action):
         if not isinstance(values, (list,)):
             values = (values,)
         for value in values:
-            _l = value.split(':')
-            n = _l[0]
-            v = _l[1]
-            for i in range(2, len(_l)):
+            n, *_l = value.split(':')
+            v = _l[0]
+            for i in range(1, len(_l)):
                 v += (':' + _l[i])
-            n, v = value.split(':')
 
             v = self._convert_v(v)
 
