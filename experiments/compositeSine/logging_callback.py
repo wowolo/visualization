@@ -187,20 +187,20 @@ class LoggingCallback(Callback):
         set_counter = 0
         
         # plot the used training data
-        plt.plot(task_x_train, task_y_train[:,d], 'o', color=grayscale_list[set_counter], markersize=3, label='Training data - task {}'.format(task_num))
+        plt.plot(task_x_train.cpu(), task_y_train[:,d].cpu(), 'o', color=grayscale_list[set_counter], markersize=3, label='Training data - task {}'.format(task_num))
         set_counter = (set_counter + 1) % len(grayscale_list)
 
         # plot the true function on the validation data
         
         plt.plot(
-            task_x_val,
-            task_y_val[:,d], 
+            task_x_val.cpu(),
+            task_y_val[:,d].cpu(), 
             'k-', 
             label='True function'
         )
         
         # plot the NN prediction on the validation data
-        plt.plot(task_x_val, task_preds_val[:,d], 'r-', label='Neural network')
+        plt.plot(task_x_val.cpu(), task_preds_val[:,d].cpu(), 'r-', label='Neural network')
         
         plt.title('Task {} - Output dimension {}'.format(task_num, d))
             
