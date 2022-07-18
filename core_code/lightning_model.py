@@ -19,9 +19,9 @@ class LightningModel(pl.LightningModule):
         
         self.model = model # create model with model_selector
         
-        tmp_config_training, tmp_all_tasks = init_config_training(**config_training)
-        self.register_buffer("config_training", tmp_config_training)
-        self.register_buffer("all_tasks", tmp_all_tasks)
+        self.config_training, self.all_tasks = init_config_training(**config_training)
+        # self.register_buffer("config_training", tmp_config_training)
+        # self.register_buffer("all_tasks", tmp_all_tasks)
 
 
 
