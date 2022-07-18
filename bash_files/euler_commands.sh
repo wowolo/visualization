@@ -34,7 +34,7 @@ echo "start"
 echo "#######################################################"
 
 # ressource allocation
-max_time="00:15" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
+max_time="08:15" # maximum time (hour:second") allocated for the job (max 120:00 / large value implies low priority)
 n_core="1" # number of core (large value implies low priority)
 memory="72000" # memory allocation (in MB) per core (large value implies low priority)
 scratch="0" # disk space (in MB) for temporary data per core
@@ -52,9 +52,9 @@ config_trainer=(
     # amp_backend
     fast_dev_run:False
     # precision
-    enable_progress_bar:False
+    enable_progress_bar:True
     max_epochs:512
-    max_time:00:05:55:00 # 00:12:00:00 - 12 hours
+    max_time:00:08:13:00 # 00:12:00:00 - 12 hours
 )
 
 # get the log filename
