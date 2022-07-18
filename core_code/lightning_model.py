@@ -79,19 +79,13 @@ class LightningModel(pl.LightningModule):
             callbacks=callbacks,
             **config_trainer
         )
-        # trainer = pl.Trainer(
-        #     **config_trainer
-        # )
-        # else:
-        #     trainer = pl.Trainer(
-        #         logger=logger,
-        #         devices=6,
-        #         # gpus=-1, 
-        #         accelerator='cpu', 
-        #         max_epochs=self.config_training['epochs'], 
-        #         # deterministic=True,
-        #         strategy="ddp_find_unused_parameters_false"
-        #     )
+
+        # log the configurations
+        if trainer.global_rank == 0:
+            logger.experiment.config.update(data_module.config_data)
+            logger.experiment.config.update(self.model.config_architecture)
+            logger.experiment.config.update(self.config_training)
+            logger.experiment.config.update(config_trainer)
 
         trainer.fit(self, data_module)
 

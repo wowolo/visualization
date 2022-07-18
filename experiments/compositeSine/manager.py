@@ -80,7 +80,7 @@ class Manager(BasicManager):
             wandb.login()
             logger = WandbLogger(
                 project = "visualization",
-                name=experimentbatch_name + f'config_{i}', 
+                name=experimentbatch_name + f'_config{i}', 
                 log_model=True
             )
 
@@ -90,13 +90,6 @@ class Manager(BasicManager):
             torch_model = CreateModel(**config_architecture)
             data_module = DataModule(data, **config_training)
             model = LightningModel(torch_model, **config_training)
-            
-            # log the configurations
-            logger.experiment.config.update(data.config_data)
-            logger.experiment.config.update(torch_model.config_architecture)
-            logger.experiment.config.update(model.config_training)
-            logger.experiment.config.update(config_custom)
-            logger.experiment.config.update(config_trainer)
 
             # handle the experiment specific logging
             logging_callback = LoggingCallback(*data.create_data('train').values(), data.config_data)
