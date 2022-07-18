@@ -42,8 +42,6 @@ n_gpus=8
 
 # set trainer configurations - partially implied by ressource allocation (do not decouple)
 config_trainer=(
-    logger:False
-    callbacks:False
     accelerator:auto
     strategy:ddp
     devices:auto
