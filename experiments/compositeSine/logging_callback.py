@@ -65,7 +65,7 @@ class LoggingCallback(Callback):
     ) -> None:
         with torch.no_grad():
             _x, _y, _task_activity = pl_module._retrieve_batch_data(batch)
-            data_len = torch.Tensor(_x.shape[0])
+            data_len = _x.shape[0]
             
             self.state_train['data_len'].append(data_len)
             self.state_train['loss'].append(outputs['loss'])
@@ -83,7 +83,7 @@ class LoggingCallback(Callback):
     ) -> None:
         with torch.no_grad():
             _x, _y, _task_activity = pl_module._retrieve_batch_data(batch)
-            data_len = torch.Tensor(_x.shape[0])
+            data_len = _x.shape[0]
             
             self.state_val['data_len'].append(data_len)
     
@@ -133,10 +133,11 @@ class LoggingCallback(Callback):
         data_len = self.state_val['data_len']
         epoch_loss = torch.sum(torch.Tensor([self.state_val['loss'][i] * data_len[i] for i in range(len(data_len))])) / torch.sum(torch.Tensor(data_len))
         
-        trainer.logger.experiment.log({'val/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
+        trainer.logger.experiment.log({'validation/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
         
         if trainer.current_epoch % self.logging_epoch_interval == 0: # plot the images based on self.state_val['batch_val_data']
             
+            del self.state_val['data_len']
             self.state_val = {key: torch.concat(self.state_val[key]) for key in self.state_val.keys()}
 
             # determine the plots we want to log and log them with self._log_plot

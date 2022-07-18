@@ -4,10 +4,11 @@ import pytorch_lightning as pl
 import wandb
 
 import core_code.util.helpers as util
-from core_code.util.default_config import init_config_training
+from core_code.util.default_config import init_config_training, init_config_trainer
 from core_code.util.config_extractions import _criterion_fm, _update_rule_fm
 
 from core_code.util.lightning import DataModule
+
 
 
 class LightningModel(pl.LightningModule):
@@ -63,23 +64,24 @@ class LightningModel(pl.LightningModule):
 
     
 
-    def fit(self, data, **config_trainer): #logger=None, name=None, seed=None, callbacks=None):
+    def fit(
+        self, 
+        data_module: DataModule,
+        logger = None,
+        callbacks: list = [],
+        **config_trainer: dict
+    ): 
         # TODO setup method such that it can be used with flags given via bash sript - flags determined by trainer
-
-        data_module = DataModule(data, **self.config_training)
-
-        # trainer = pl.Trainer(**config_trainer)
+        config_trainer = init_config_trainer(**config_trainer)
         
-        # if isinstance(logger, type(None)):
         trainer = pl.Trainer(
-            devices=3,
-            logger=config_trainer['logger'],
-            callbacks=config_trainer['callbacks'],
-            accelerator='cpu', 
-            max_epochs=self.config_training['epochs'], 
-            # deterministic=True,
-            strategy="ddp_find_unused_parameters_false"
+            logger=logger,
+            callbacks=callbacks,
+            **config_trainer
         )
+        # trainer = pl.Trainer(
+        #     **config_trainer
+        # )
         # else:
         #     trainer = pl.Trainer(
         #         logger=logger,
@@ -92,11 +94,6 @@ class LightningModel(pl.LightningModule):
         #     )
 
         trainer.fit(self, data_module)
-
-        trainer.logger.experiment.config.update(data.config_data)
-        trainer.logger.experiment.config.update(self.model.config_architecture)
-        trainer.logger.experiment.config.update(self.config_training)
-        trainer.logger.experiment.config.update(config_trainer)
 
     
 

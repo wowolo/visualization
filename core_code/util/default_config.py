@@ -90,3 +90,25 @@ def init_config_Stack(**kwargs):
     }
     
     return _make_init_config(default_extraction_strings, **kwargs)[0] # task activity not needed
+
+
+
+def init_config_trainer(**kwargs):
+
+    default_extraction_strings = {
+        'accelerator': 'auto',
+        'strategy': 'ddp',
+        'devices': 'auto',
+        'auto_select_gpus': True,
+        'deterministic': False,
+        # 'default_root_dir'
+        # 'auto_lr_find': False
+        # 'amp_backend'
+        'fast_dev_run': False,
+        # 'precision'
+        'enable_progress_bar': False,
+        'max_epochs': 1024,
+        'max_time': '00:05:55:00' # 00:12:00:00 - 12 hours
+    }
+
+    return _make_init_config(default_extraction_strings, **kwargs)[0]

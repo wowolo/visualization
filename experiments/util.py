@@ -8,17 +8,6 @@ from sklearn.model_selection import ParameterGrid
 
 
 class BasicManager():
-    
-    @staticmethod
-    def make_jsonable(x):
-
-        try:
-            json.dumps(x)
-            return x
-        except:
-            return str(x)
-
-
 
     @staticmethod
     def dictvals_to_list(dict):
@@ -30,127 +19,8 @@ class BasicManager():
         return dict
 
 
-    
-    @staticmethod
-    def set_randomness(torch_seed, numpy_seed):
-        import torch
-        torch.manual_seed(torch_seed)
-        import numpy as np
-        np.random.seed(numpy_seed)
 
-
-
-    @staticmethod
-    def default_experimentbatch_name(experimentbatch_name):
-
-        if isinstance(experimentbatch_name, type(None)):
-            timestamp = datetime.now().strftime('%H-%M_%d.%m.%Y')
-            experimentbatch_name = 'experiments_{}'.format(timestamp)
-        
-        return experimentbatch_name
-
-    
-    
-    def default_experimentbatch_dir(self, root, experimentbatch_name):
-
-        root = Path(root)
-        experimentbatch_name = self.default_experimentbatch_name(experimentbatch_name)
-        experimentbatch_path = root / experimentbatch_name
-
-        i = 0
-        while True:
-            try:
-                os.mkdir(experimentbatch_path)
-                break
-            except FileExistsError:
-                experimentbatch_path = root / (experimentbatch_name + '_{}'.format(i))
-                i += 1
-                continue
-
-        return experimentbatch_path
-
-    
-
-    # def dict_to_file(self, dict, file_path, format='v'):
-    #     # format: 'v' or 'h'
-    #     with open(file_path, 'w') as file:
-    #         if format == 'v':
-    #             for key, val in dict.items():
-    #                 file.write('{}: {}\n'.format(key, val))
-    #         else:
-    #             json_dict = {key: self.make_jsonable(dict[key]) for key in dict.keys()}
-    #             file.write(json.dumps(json_dict))
-
-
-
-    def dict_to_file(self, dict_, file_path):
-        # format: 'v' or 'h'
-        with open(file_path, 'w') as file:
-            json_dict = {key: self.make_jsonable(dict_[key]) for key in dict_.keys()}
-            file.write(json.dumps(json_dict))
-
-
-
-    # reverse the dict to file method to create dict: separator ': ' for each line
-    def file_to_dict(self, file_path):
-        with open(file_path, 'r') as file:
-            dict_ = json.load(file)
-        return dict_
-    
-    
-
-    def list_to_file(self, list_, file_path, format='v'):
-
-        with open(file_path, 'w') as file:
-            file.write(json.dumps(list_))
-
-
-    
-    @staticmethod
-    def save_network_weights(experiment_path, nn_model):
-
-        nn_model.save(experiment_path / 'nn_model_weights.pt')
-
-
-
-    @staticmethod
-    def create_storage_dir(storage_path, file_path_parent):
-
-        if isinstance(storage_path, type(None)):
-            storage_path = file_path_parent / 'storage'
-        else:
-            storage_path = Path(storage_path)
-
-        try:
-            os.mkdir(storage_path)
-        except FileExistsError:
-            pass
-
-        return storage_path
-
-
-
-    @staticmethod
-    def create_experiment_dir(experimentbatch_path, i, print_only=False):
-
-        exp_ind = 'experiment_{}'.format(i)
-        experiment_path = experimentbatch_path / exp_ind
-
-        if not(print_only):
-            os.mkdir(experiment_path)
-
-        return experiment_path
-
-
-
-    def grid_config_lists(self, *args): #configs_data, configs_architecture, configs_traininig):
-        # here custom changes possible to make the configurations list creation suitable to needs
-        # based on Stack/NTK set width / bottl, var to None
-
-        # config_list_data, config_list_architecture, config_list_training = [], [], []
-        # configs = configs_data.copy()
-        # configs.update(configs_architecture)
-        # configs.update(configs_traininig)
+    def grid_config_lists(self, *args): 
 
         configs = {}
         for config in args:
@@ -169,20 +39,20 @@ class BasicManager():
                 temp_dict = {key: new_config[key] for key in args[i].keys()}
                 args_list_of_configs[i] = args_list_of_configs[i] + [temp_dict]
 
-            # temp_dict = {key: new_config[key] for key in configs_data.keys()}
-            # config_list_data.append(temp_dict) 
-            # temp_dict = {key: new_config[key] for key in configs_architecture.keys()}
-            # config_list_architecture.append(temp_dict)
-            # temp_dict = {key: new_config[key] for key in configs_traininig.keys()}
-            # config_list_training.append(temp_dict) 
-        
-        # return config_list_data, config_list_architecture, config_list_training
         return args_list_of_configs
+    
 
 
-# def readin_model(weight_path, architecture_path):
-#     config_architecture = BasicManager.file_to_dict(architecture_path)
-#     # read the config file architecture -> dict
-#     # create nn_model
-#     nn_model.load(weight_path)
-#     return nn_model
+    def _create_grid(self): 
+        # list of configs
+        list_of_lists = self.grid_config_lists(
+            self.configs_data, 
+            self.configs_architecture, 
+            self.configs_traininig,
+            self.configs_trainer, 
+            self.configs_custom
+        )
+
+        self.num_experiments = len(list_of_lists[0])
+
+        return list_of_lists
