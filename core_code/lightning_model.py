@@ -107,7 +107,11 @@ class LightningModel(pl.LightningModule):
             # compute loss based on task configurations 
             loss = torch.zeros((1), requires_grad=True).type_as(x)
             device = loss.get_device()
-            print(device)
+            print('loss: {}'.format(device))
+            device = preds.get_device()
+            print('preds: {}'.format(device))
+            device = y.get_device()
+            print('y: {}'.format(device))
             unique_activities = torch.unique(task_activity).int()
 
             for task_num in unique_activities:
@@ -117,7 +121,7 @@ class LightningModel(pl.LightningModule):
                 _ind = (task_activity == task_num)
                 criterion = _criterion_fm(task_config['criterion'])
 
-                loss = loss + criterion(preds[_ind].to(device), y[_ind].to(device))
+                loss = loss + criterion(preds[_ind], y[_ind])
 
             return {'preds': preds, 'loss': loss}
 
