@@ -48,7 +48,7 @@ configs_training = {
     'epochs': 512, #024, 
     'batch_size': 64, 
     'data_task_batching': True,
-    'learning_rate': 0.005,
+    'learning_rate': 0.01,
     'update_rule': 'SGD',
     'regularization_alpha': 0.005,
     'regularization_ord': 2,

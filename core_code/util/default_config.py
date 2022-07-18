@@ -97,7 +97,7 @@ def init_config_trainer(**kwargs):
 
     default_extraction_strings = {
         'accelerator': 'auto',
-        'strategy': 'ddp',
+        'strategy': 'ddp_find_unused_parameters_false',
         'devices': 'auto',
         'auto_select_gpus': True,
         'deterministic': False,
