@@ -50,7 +50,7 @@ configs_training = {
     'data_task_batching': True,
     'learning_rate': 0.01,
     'update_rule': 'SGD',
-    'regularization_alpha': 0.005,
+    'regularization_alpha': 0.0001,
     'regularization_ord': 2,
     #### (potentially) task specific ####
     'criterion': {'task_0': ('dimred_MSELoss', [0]), 'task_1': ('dimred_MSELoss', list(np.arange(1, 7)))}, 

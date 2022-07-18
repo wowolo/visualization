@@ -43,14 +43,14 @@ n_gpus=8
 # set trainer configurations - partially implied by ressource allocation (do not decouple)
 config_trainer=(
     accelerator:auto
-    strategy:ddp
+    strategy:ddp_find_unused_parameters_false
     devices:auto
     auto_select_gpus:False
     deterministic:False
     # default_root_dir
     # auto_lr_find:False
     # amp_backend
-    fast_dev_run:True
+    fast_dev_run:False
     # precision
     enable_progress_bar:False
     max_epochs:512

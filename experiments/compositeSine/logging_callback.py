@@ -91,13 +91,6 @@ class LoggingCallback(Callback):
             # log validation loss
             loss = torch.zeros((1), requires_grad=False).type_as(_x)
 
-            device = loss.get_device()
-            print('loss: {}'.format(device))
-            device = _preds.get_device()
-            print('_preds: {}'.format(device))
-            device = _y.get_device()
-            print('_y: {}'.format(device))
-
             for task_num in torch.unique(_task_activity):
 
                 task_config = util.extract_taskconfig(pl_module.config_training, task_num)
