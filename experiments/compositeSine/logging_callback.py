@@ -61,7 +61,6 @@ class LoggingCallback(Callback):
         outputs: Sequence,
         batch: Sequence,
         batch_idx: int,
-        dataloader_idx: int,
     ) -> None:
         with torch.no_grad():
             _x, _y, _task_activity = pl_module._retrieve_batch_data(batch)
