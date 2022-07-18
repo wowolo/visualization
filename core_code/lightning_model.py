@@ -26,7 +26,7 @@ class LightningModel(pl.LightningModule):
 
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(x).as_type(x)
 
 
 
@@ -42,7 +42,7 @@ class LightningModel(pl.LightningModule):
         
         # add regularization terms to loss
         loss = outputs['loss']
-        reg = torch.tensor(0., requires_grad=True)
+        reg = torch.tensor(0., requires_grad=True).as_type(loss)
 
         for param in self.parameters():
             reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
@@ -105,7 +105,7 @@ class LightningModel(pl.LightningModule):
 
         else:
             # compute loss based on task configurations 
-            loss = torch.zeros((1), requires_grad=True)
+            loss = torch.zeros((1), requires_grad=True).as_type(x)
             device = loss.get_device()
             print(device)
             unique_activities = torch.unique(task_activity).int()

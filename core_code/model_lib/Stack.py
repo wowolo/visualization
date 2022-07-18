@@ -144,11 +144,10 @@ class NNModel(torch.nn.Module):
     def forward(self, x):
 
         for layer in self.layers[:-1]:
-            layer = layer.type_as(x)
             activation = util._hidden_bottleneck_activation_fm(self.config_architecture['hidden_bottleneck_activation'])
             x = activation()(layer(x))
         
-        last_layer = self.layers[-1].type_as(x)
+        last_layer = self.layers[-1]
         x = last_layer(x)
         
         return x
