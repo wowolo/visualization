@@ -16,8 +16,12 @@ class LightningModel(pl.LightningModule):
 
     def __init__(self, model, **config_training):
         super(LightningModel, self).__init__()
+        
         self.model = model # create model with model_selector
+        
         self.config_training, self.all_tasks = init_config_training(**config_training)
+        self.register_buffer("config_training", self.config_training)
+        self.register_buffer("all_tasks", self.all_tasks)
 
 
 
