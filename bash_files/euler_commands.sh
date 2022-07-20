@@ -54,7 +54,7 @@ config_trainer=(
     # precision
     enable_progress_bar:True
     max_epochs:512
-    max_time:00:08:13:00 # 00:12:00:00 - 12 hours
+    max_time:00:00:10:00 # 00:12:00:00 - 12 hours
 )
 
 # get the log filename
