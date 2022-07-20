@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 import wandb
+from pytorch_lightning.loggers import WandbLogger
+
 
 import core_code.util.helpers as util
 from core_code.util.default_config import init_config_training, init_config_trainer
@@ -71,26 +73,34 @@ class LightningModel(pl.LightningModule):
     def fit(
         self, 
         data_module: DataModule,
-        logger = None,
+        project: str = None,
+        name: str = None,
         callbacks: list = [],
         **config_trainer: dict
     ): 
         # TODO setup method such that it can be used with flags given via bash sript - flags determined by trainer
         config_trainer = init_config_trainer(**config_trainer)
-        
+
+        wandb.login()
+        logger = WandbLogger(
+            project = project,
+            name = name, 
+            log_model=True
+        )
+
         trainer = pl.Trainer(
             logger=logger,
             callbacks=callbacks,
             **config_trainer
         )
-
+        
         # log the configurations
         if trainer.global_rank == 0:
             logger.experiment.config.update(data_module.data.config_data)
             logger.experiment.config.update(self.model.config_architecture)
             logger.experiment.config.update(self.config_training)
             logger.experiment.config.update(config_trainer)
-
+        
         trainer.fit(self, data_module)
 
     

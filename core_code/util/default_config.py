@@ -42,7 +42,6 @@ def init_config_training(**kwargs):
     default_extraction_strings = {
         'criterion': 'MSELoss',
         'shuffle': True,
-        'epochs': 1024, 
         'batch_size': 64,
         'regularization_alpha': 0.1, 
         'regularization_ord': 2,
@@ -106,8 +105,8 @@ def init_config_trainer(**kwargs):
         # 'amp_backend'
         'fast_dev_run': False,
         # 'precision'
-        'enable_progress_bar': False,
-        'max_epochs': 5,
+        'enable_progress_bar': True,
+        'max_epochs': 512,
         'max_time': '00:08:00:00' # 00:12:00:00 - 12 hours
     }
 

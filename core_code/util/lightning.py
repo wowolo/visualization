@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -31,7 +32,7 @@ class CustomDataset(Dataset):
 
 
 
-def DataLoaders(x, y, task_activity, **kwargs): 
+def DataLoaders(x, y, task_activity, num_workers=0, **kwargs): 
     task_activity = torch.Tensor(task_activity)
 
     allowed_keys = list(set(['batch_size', 'shuffle']).intersection(kwargs.keys()))
@@ -62,11 +63,11 @@ def DataLoaders(x, y, task_activity, **kwargs):
         _dataset_partitions = {'task_{}'.format(i): CustomDataset(x[_ind_taskdatas[i]], y[_ind_taskdatas[i]], task_activity[_ind_taskdatas[i]]) for i in unique_activities}
         if not(isinstance(dataloader_dict['shuffle'], dict)):
             _shuffle = {'task_{}'.format(i): dataloader_dict['shuffle'] for i in unique_activities}
-        data_loaders = {'task_{}'.format(i): DataLoader(_dataset_partitions['task_{}'.format(i)], batch_size=_batch_sizes['task_{}'.format(i)], shuffle=_shuffle['task_{}'.format(i)]) for i in unique_activities}
+        data_loaders = {'task_{}'.format(i): DataLoader(_dataset_partitions['task_{}'.format(i)], batch_size=_batch_sizes['task_{}'.format(i)], shuffle=_shuffle['task_{}'.format(i)], num_workers=num_workers) for i in unique_activities}
     
     else:
         dataset = CustomDataset(x, y, task_activity)
-        data_loaders =  {'task_0': DataLoader(dataset, **dataloader_dict)}
+        data_loaders =  {'task_0': DataLoader(dataset, num_workers=num_workers, **dataloader_dict)}
 
     return CombinedLoader(data_loaders)
 
@@ -79,6 +80,7 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
         self.data = data
         self.config_training, self.all_tasks = init_config_training(**config_training)
+        self.n_cpus = os.cpu_count()
 
 
 
@@ -95,7 +97,7 @@ class DataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self): # create training data based on 'data_task_batching'
-        data_loaders = DataLoaders(*self.data_train.values(), **self.config_training)
+        data_loaders = DataLoaders(*self.data_train.values(), num_workers=self.n_cpus, **self.config_training)
         return data_loaders
 
 
@@ -106,7 +108,7 @@ class DataModule(pl.LightningDataModule):
             'data_task_batching': self.config_training['data_task_batching'],
             'shuffle': False
         }
-        data_loaders = DataLoaders(*self.data_val.values(), **loader_config)
+        data_loaders = DataLoaders(*self.data_val.values(), num_workers=self.n_cpus, **loader_config)
         return data_loaders
 
 
@@ -117,5 +119,5 @@ class DataModule(pl.LightningDataModule):
             'data_task_batching': self.config_training['data_task_batching'],
             'shuffle': False
         }
-        data_loaders = DataLoaders(*self.data_test.values(), **loader_config)
+        data_loaders = DataLoaders(*self.data_test.values(), num_workers=self.n_cpus, **loader_config)
         return data_loaders

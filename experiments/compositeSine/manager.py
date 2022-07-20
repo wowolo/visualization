@@ -76,27 +76,21 @@ class Manager(BasicManager):
             config_training = self.configs_training_list[i]
             config_custom = self.configs_custom_list[i]
             config_trainer = self.configs_trainer_list[i]
-            
-            wandb.login()
-            logger = WandbLogger(
-                project = "visualization",
-                name=experimentbatch_name + f'_config{i}', 
-                log_model=True
-            )
 
             # initialize the core objects#
             pl.seed_everything(config_custom['seed'], config_custom['workers'])
             data = CreateData(**config_data)
             torch_model = CreateModel(**config_architecture)
             data_module = DataModule(data, **config_training)
+
             model = LightningModel(torch_model, **config_training)
 
-            # handle the experiment specific logging
             logging_callback = LoggingCallback(*data.create_data('train').values(), data.config_data)
             
             model.fit(
-                data_module, 
-                logger=logger, 
+                data_module,
+                project="visualization", 
+                name=experimentbatch_name + f'_config{i}',
                 callbacks=[logging_callback],
                 **config_trainer
             )
