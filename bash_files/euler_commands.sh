@@ -71,7 +71,7 @@ num_configs=$?
 tag=$tag'[1-'$num_configs']'
 
 # submit the job
-bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory, ngpus_excl_p=$n_gpus]" python $project_path/main.py --experimentbatch_name $tag --config_trainer ${config_trainer[@]} --num_config ${LSB_JOBINDEX}
+bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory, ngpus_excl_p=$n_gpus]" "python $project_path/main.py --experimentbatch_name $tag --config_trainer ${config_trainer[@]} --num_config \$LSB_JOBINDEX"
 
 # display the current queue
 bbjobs
