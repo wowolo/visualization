@@ -68,7 +68,7 @@ source $project_path/$python_env/bin/activate
 python $project_path/pre_main.py
 num_configs=$?
 
-tag=$tag'['$num_configs']'
+tag=$tag'[1-'$num_configs']'
 echo tag
 
 # submit the job
