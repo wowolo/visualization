@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -80,7 +79,7 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
         self.data = data
         self.config_training, self.all_tasks = init_config_training(**config_training)
-        self.n_workers = 2 # os.cpu_count()
+        self.n_workers = 1 # os.cpu_count()
 
 
 

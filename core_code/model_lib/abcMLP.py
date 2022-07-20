@@ -89,8 +89,8 @@ class NNModel(torch.nn.Module):
     
     def forward(self, x):
 
+        activation = util._hidden_layer_activation_fm(self.config_architecture['hidden_layer_activation'])
         for layer in self.layers[:-1]:
-            activation = util._hidden_layer_activation_fm(self.config_architecture['hidden_layer_activation'])
             x = activation()(layer(x))
         
         last_layer = self.layers[-1]

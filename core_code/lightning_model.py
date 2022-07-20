@@ -45,10 +45,14 @@ class LightningModel(pl.LightningModule):
         # add regularization terms to loss
         loss = outputs['loss']
 
-        reg = torch.tensor(0., requires_grad=True).type_as(loss)
-        for param in self.model.parameters():
-            reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
-        loss = loss + self.config_training['regularization_alpha'] * reg
+        reg_alpha = self.config_training['regularization_alpha']
+        if reg_alpha != 0:
+
+            reg = torch.tensor(0., requires_grad=True).type_as(loss)
+            for param in self.model.parameters():
+                reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
+        
+            loss = loss + reg_alpha * reg
         
         outputs['loss'] =  loss
 

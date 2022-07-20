@@ -49,7 +49,7 @@ configs_data.update(config_function)
 configs_training = {
     'batch_size': 64, 
     'data_task_batching': True,
-    'learning_rate': 0.01,
+    'learning_rate': 0.005,
     'update_rule': 'SGD',
     'regularization_alpha': 0.00,
     'regularization_ord': 2,
@@ -66,5 +66,5 @@ configs_custom = {
     'callbacks': True,
     'seed': 77,
     'workers': True,
-    'logging_epoch_interval': 2
+    'logging_epoch_interval': 50
 }
