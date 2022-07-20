@@ -52,8 +52,6 @@ class StoreDict(argparse.Action):
 
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('num_config', type=int)
-# parser.add_argument('-f', '--num_config', type=int)
 parser.add_argument('--experimentbatch_name', type=str)
 parser.add_argument('--config_trainer', action=StoreDict, nargs='*')
 parser.add_argument('--num_config', type=int)
@@ -74,7 +72,7 @@ def main():
     if isinstance(config_trainer, type(None)):
         config_trainer = {}
 
-    num_config = int(args.num_config)
+    num_config = args.num_config
     if isinstance(num_config, type(None)):
         num_config = 1
     num_config -= 1
