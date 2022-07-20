@@ -1,7 +1,7 @@
 # handle all the logging via one callback class
 from typing import Sequence
 import io
-import tempfile
+import numpy as np
 
 import torch
 from pytorch_lightning import Callback, Trainer, LightningModule
@@ -208,21 +208,19 @@ class LoggingCallback(Callback):
             
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
-        # # log the plots - plotly
-        # trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
-        
         # log the plots - jpg
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            filename = tmpdirname + '/' + 'tmp.jpg'
+        # trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
+        io_buf = io.BytesIO()
+        fig.savefig(io_buf, format='png')
+        io_buf.seek(0)
+        tmp_img = plt.imread(io_buf)
+        io_buf.close()
 
-            fig.savefig(filename)
-            im = plt.imread(filename)
-
-            wandb.log(
-                {
-                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(im)], 
-                    'epoch': trainer.current_epoch
-                }
-            )
+        wandb.log(
+            {
+                'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
+                'epoch': trainer.current_epoch
+            }
+        )
 
         plt.close()
