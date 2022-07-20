@@ -66,7 +66,7 @@ class Manager(BasicManager):
 
         if isinstance(ind_configs, type(None)):
             ind_configs = [i for i in range(self.num_experiments)]
-        elif isinstance(ind_configs, int) or isinstance(ind_configs, float):
+        elif isinstance(ind_configs, int): # or isinstance(ind_configs, float):
             ind_configs = [int(ind_configs)]
 
         for i in ind_configs:

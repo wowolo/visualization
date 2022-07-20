@@ -11,7 +11,7 @@ config_function = {
 # configs for model architecture
 configs_architecture = {
     'architecture_key': 'abcMLP',
-    'depth': 6,
+    'depth': [6, 4],
     'width': 4096, 
     'bottleneck_width': 256, # for Stack
     'variable_width': 4096, # for Stack

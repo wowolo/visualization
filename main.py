@@ -54,6 +54,8 @@ class StoreDict(argparse.Action):
 parser = argparse.ArgumentParser()
 parser.add_argument('--experimentbatch_name', type=str)
 parser.add_argument('--config_trainer', action=StoreDict, nargs='*')
+parser.add_argument('--num_config', type=int)
+
 
 
 
@@ -69,6 +71,12 @@ def main():
     if isinstance(config_trainer, type(None)):
         config_trainer = {}
 
+    num_config = args.num_config
+    if isinstance(experimentbatch_name, type(None)):
+        num_config = 1
+    num_config -= 1
+
+
     # config_trainer['fast_dev_run'] = True ######tmp
 
     manager = Manager(
@@ -79,7 +87,7 @@ def main():
         configs_custom
     )
     
-    manager.run(experimentbatch_name)
+    manager.run(experimentbatch_name, ind_configs=num_config)
 
 
 
