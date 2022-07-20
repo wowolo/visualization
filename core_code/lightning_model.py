@@ -41,20 +41,16 @@ class LightningModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs = self._compute_combined_taskloss(batch)
-        print('Checking some stuff:')
-        print(outputs)
         
         # add regularization terms to loss
         loss = outputs['loss']
+
         reg = torch.tensor(0., requires_grad=True).type_as(loss)
-
-        for param in self.parameters():
+        for param in self.model.parameters():
             reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
-        print(reg)
-
         loss = loss + self.config_training['regularization_alpha'] * reg
+        
         outputs['loss'] =  loss
-        print(loss)
 
         return outputs
     

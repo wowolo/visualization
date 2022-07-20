@@ -43,7 +43,8 @@ class Manager(BasicManager):
             'logger': True,
             'callbacks': True,
             'seed': 77,
-            'workers': True
+            'workers': True,
+            'logging_epoch_interval': 50
         }
 
         return _make_init_config(default_extraction_strings, **kwargs)[0]
@@ -85,7 +86,11 @@ class Manager(BasicManager):
 
             model = LightningModel(torch_model, **config_training)
 
-            logging_callback = LoggingCallback(*data.create_data('train').values(), data.config_data)
+            logging_callback = LoggingCallback(
+                *data.create_data('train').values(), 
+                data.config_data, 
+                logging_epoch_interval=config_custom['logging_epoch_interval']
+            )
             
             model.fit(
                 data_module,

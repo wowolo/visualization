@@ -10,7 +10,7 @@ config_function = {
 
 # configs for model architecture
 configs_architecture = {
-    'architecture_key': 'Stack',
+    'architecture_key': 'abcMLP',
     'depth': 6,
     'width': 4096, 
     'bottleneck_width': 256, # for Stack
@@ -21,8 +21,10 @@ configs_architecture = {
     'hidden_bottleneck_activation': 'Identity', 
     'hidden_layer_activation': 'ReLU', 
     # for abcMLP
-    'list_a': [[0] + [0.5 for i in range(5)]], 
-    'list_b': [[0 for i in range(6)]], 
+    'list_a': [-.5] + [0 for i in range(4)] + [.5], # default: mup
+    'list_b': [.5 for i in range(6)], # default: mup
+    # 'list_a': [[0] + [0.5 for i in range(5)]], 
+    # 'list_b': [[0 for i in range(6)]], 
     'c': 0, 
 }
 configs_architecture.update(config_function)
@@ -34,7 +36,7 @@ configs_data = {
     'noise_scale': .1,
     'x_min_train': -2,
     'x_max_train': {'task_0': 0, 'task_1': 2},
-    'n_val': {'task_0': 512, 'task_1': 512},
+    'n_val': 2048,
     'x_min_val': -2,
     'x_max_val': 2,
     'n_test': {'task_0': 64, 'task_1': 256},
@@ -47,9 +49,9 @@ configs_data.update(config_function)
 configs_training = {
     'batch_size': 64, 
     'data_task_batching': True,
-    'learning_rate': 0.001,
+    'learning_rate': 0.01,
     'update_rule': 'SGD',
-    'regularization_alpha': 0.0005,
+    'regularization_alpha': 0.00,
     'regularization_ord': 2,
     #### (potentially) task specific ####
     'criterion': {'task_0': ('dimred_MSELoss', [0]), 'task_1': ('dimred_MSELoss', list(np.arange(1, 7)))}, 
@@ -63,5 +65,6 @@ configs_custom = {
     'logger': True,
     'callbacks': True,
     'seed': 77,
-    'workers': True
+    'workers': True,
+    'logging_epoch_interval': 2
 }

@@ -102,7 +102,7 @@ class LoggingCallback(Callback):
 
             self.state_val['loss'].append(loss)
 
-            if trainer.current_epoch % self.logging_epoch_interval == 0 or (trainer.current_epoch == (trainer.max_epochs-1)):
+            if trainer.current_epoch % self.logging_epoch_interval == 1 or (trainer.current_epoch == (trainer.max_epochs-1)):
                 self.state_val['x'].append(_x)
                 self.state_val['y'].append(_y)
                 self.state_val['task_activity'].append(_task_activity)
@@ -136,7 +136,7 @@ class LoggingCallback(Callback):
         
         trainer.logger.experiment.log({'validation/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
         
-        if (trainer.current_epoch % self.logging_epoch_interval == 0) or (trainer.current_epoch == (trainer.max_epochs-1)): # plot the images based on the states collected over the epoch
+        if (trainer.current_epoch % self.logging_epoch_interval == 1) or (trainer.current_epoch == (trainer.max_epochs-1)): # plot the images based on the states collected over the epoch
             
             del self.state_val['data_len']
             self.state_val = {key: torch.concat(self.state_val[key]).cpu() for key in self.state_val.keys()}
@@ -164,7 +164,7 @@ class LoggingCallback(Callback):
         d
     ) -> Figure:
 
-        plt.figure()
+        fig = plt.figure()
 
         # task_config = util.extract_taskconfig(self.config_data, task_num) 
 
@@ -208,17 +208,19 @@ class LoggingCallback(Callback):
             
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
-        # log the plots - plotly
-        trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
+        # # log the plots - plotly
+        # trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
+        
         # log the plots - jpg
         with tempfile.TemporaryDirectory() as tmpdirname:
-            filename = tmpdirname + '/' + 'temp.jpg'
-            
-            plt.savefig(filename)
+            filename = tmpdirname + '/' + 'tmp.jpg'
 
-            trainer.logger.experiment.log(
+            fig.savefig(filename)
+            im = plt.imread(filename)
+
+            wandb.log(
                 {
-                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): wandb.Image(filename), 
+                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(im)], 
                     'epoch': trainer.current_epoch
                 }
             )
