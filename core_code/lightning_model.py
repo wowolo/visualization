@@ -34,13 +34,15 @@ class LightningModel(pl.LightningModule):
 
     def configure_optimizers(self):
         update = _update_rule_fm(self.config_training['update_rule'])
-        optimizer = update(self.parameters(), lr=self.config_training['learning_rate'])
+        optimizer = update(self.model.parameters(), lr=self.config_training['learning_rate'])
         return optimizer
 
 
 
     def training_step(self, batch, batch_idx):
         outputs = self._compute_combined_taskloss(batch)
+        print('Checking some stuff:')
+        print(outputs)
         
         # add regularization terms to loss
         loss = outputs['loss']
@@ -48,9 +50,11 @@ class LightningModel(pl.LightningModule):
 
         for param in self.parameters():
             reg = reg + torch.linalg.vector_norm(param.flatten(), ord=self.config_training['regularization_ord'])**2
-        
+        print(reg)
+
         loss = loss + self.config_training['regularization_alpha'] * reg
         outputs['loss'] =  loss
+        print(loss)
 
         return outputs
     

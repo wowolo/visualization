@@ -102,7 +102,7 @@ class LoggingCallback(Callback):
 
             self.state_val['loss'].append(loss)
 
-            if trainer.current_epoch % self.logging_epoch_interval == 0:
+            if trainer.current_epoch % self.logging_epoch_interval == 0 or (trainer.current_epoch == (trainer.max_epochs-1)):
                 self.state_val['x'].append(_x)
                 self.state_val['y'].append(_y)
                 self.state_val['task_activity'].append(_task_activity)
@@ -211,18 +211,14 @@ class LoggingCallback(Callback):
         # log the plots - plotly
         trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
         # log the plots - jpg
-        with io.BytesIO() as buf:
-
-            plt.savefig(buf, format='jpg')
-
-            tmp_file = tempfile.NamedTemporaryFile() 
-
-            with open(f"{tmp_file.name}.jpg",'wb') as _file:
-                _file.write(buf.getvalue()) 
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filename = tmpdirname + '/' + 'temp.jpg'
+            
+            plt.savefig(filename)
 
             trainer.logger.experiment.log(
                 {
-                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): wandb.Image(f"{tmp_file.name}.jpg"), 
+                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): wandb.Image(filename), 
                     'epoch': trainer.current_epoch
                 }
             )

@@ -80,7 +80,7 @@ class DataModule(pl.LightningDataModule):
         super().__init__()
         self.data = data
         self.config_training, self.all_tasks = init_config_training(**config_training)
-        self.n_cpus = os.cpu_count()
+        self.n_workers = 2 # os.cpu_count()
 
 
 
@@ -97,7 +97,7 @@ class DataModule(pl.LightningDataModule):
 
 
     def train_dataloader(self): # create training data based on 'data_task_batching'
-        data_loaders = DataLoaders(*self.data_train.values(), num_workers=self.n_cpus, **self.config_training)
+        data_loaders = DataLoaders(*self.data_train.values(), num_workers=self.n_workers, **self.config_training)
         return data_loaders
 
 
@@ -108,7 +108,7 @@ class DataModule(pl.LightningDataModule):
             'data_task_batching': self.config_training['data_task_batching'],
             'shuffle': False
         }
-        data_loaders = DataLoaders(*self.data_val.values(), num_workers=self.n_cpus, **loader_config)
+        data_loaders = DataLoaders(*self.data_val.values(), num_workers=self.n_workers, **loader_config)
         return data_loaders
 
 
@@ -119,5 +119,5 @@ class DataModule(pl.LightningDataModule):
             'data_task_batching': self.config_training['data_task_batching'],
             'shuffle': False
         }
-        data_loaders = DataLoaders(*self.data_test.values(), num_workers=self.n_cpus, **loader_config)
+        data_loaders = DataLoaders(*self.data_test.values(), num_workers=self.n_workers, **loader_config)
         return data_loaders
