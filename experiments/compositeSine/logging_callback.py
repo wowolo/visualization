@@ -222,4 +222,4 @@ class LoggingCallback(Callback):
             }
         )
 
-        fig.close()
+        plt.close(fig)
