@@ -56,7 +56,7 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('-f', '--num_config', type=int)
 parser.add_argument('--experimentbatch_name', type=str)
 parser.add_argument('--config_trainer', action=StoreDict, nargs='*')
-parser.add_argument('--num_config', type=str)
+parser.add_argument('--num_config', type=int)
 
 
 
