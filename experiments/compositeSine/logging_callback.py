@@ -209,7 +209,6 @@ class LoggingCallback(Callback):
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
         # log the plots - jpg
-        # trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
         io_buf = io.BytesIO()
         fig.savefig(io_buf, format='png')
         io_buf.seek(0)
@@ -223,4 +222,4 @@ class LoggingCallback(Callback):
             }
         )
 
-        plt.close()
+        fig.close()
