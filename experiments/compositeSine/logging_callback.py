@@ -1,9 +1,11 @@
 # handle all the logging via one callback class
-from distutils.command.config import config
 from typing import Sequence
+import io
+import tempfile
 
 import torch
 from pytorch_lightning import Callback, Trainer, LightningModule
+import wandb
 
 from matplotlib import pyplot as plt
 from matplotlib import figure as Figure
@@ -27,11 +29,11 @@ class LoggingCallback(Callback):
         y_train,
         task_activity_train,
         config_data: dict = {},
-        logging_epoch_interval: int = 20,
+        logging_epoch_interval: int = 50,
     ):
         super().__init__()
-        self.x_train = x_train
-        self.y_train = y_train
+        self.x_train = x_train.cpu()
+        self.y_train = y_train.cpu()
         self.task_activity_train = task_activity_train
         self.config_data, self.all_losses = init_config_data(**config_data)
         self.logging_epoch_interval = logging_epoch_interval
@@ -137,7 +139,7 @@ class LoggingCallback(Callback):
         if trainer.current_epoch % self.logging_epoch_interval == 0: # plot the images based on self.state_val['batch_val_data']
             
             del self.state_val['data_len']
-            self.state_val = {key: torch.concat(self.state_val[key]) for key in self.state_val.keys()}
+            self.state_val = {key: torch.concat(self.state_val[key]).cpu() for key in self.state_val.keys()}
 
             # determine the plots we want to log and log them with self._log_plot
             unique_activities = torch.unique(self.state_val['task_activity']).int()
@@ -164,7 +166,7 @@ class LoggingCallback(Callback):
 
         plt.figure()
 
-        task_config = util.extract_taskconfig(self.config_data, task_num) 
+        # task_config = util.extract_taskconfig(self.config_data, task_num) 
 
         _ind = (self.task_activity_train == task_num)
         task_x_train = self.x_train[_ind]
@@ -180,14 +182,21 @@ class LoggingCallback(Callback):
         set_counter = 0
         
         # plot the used training data
-        plt.plot(task_x_train.cpu(), task_y_train[:,d].cpu(), 'o', color=grayscale_list[set_counter], markersize=3, label='Training data - task {}'.format(task_num))
+        plt.plot(
+            task_x_train, 
+            task_y_train[:,d], 
+            'o', 
+            color=grayscale_list[set_counter], 
+            markersize=3, 
+            label='Training data - task {}'.format(task_num)
+        )
         set_counter = (set_counter + 1) % len(grayscale_list)
 
         # plot the true function on the validation data
         
         plt.plot(
-            task_x_val.cpu(),
-            task_y_val[:,d].cpu(), 
+            task_x_val,
+            task_y_val[:,d], 
             'k-', 
             label='True function'
         )
@@ -199,7 +208,23 @@ class LoggingCallback(Callback):
             
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
-        # log the plots
+        # log the plots - plotly
         trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
+        # log the plots - jpg
+        with io.BytesIO() as buf:
+            
+            plt.savefig(buf, format='jpg')
+
+            tmp_file = tempfile.NamedTemporaryFile() 
+
+            with open(f"{tmp_file.name}.jpg",'wb') as _file:
+                _file.write(buf.getvalue()) 
+
+            trainer.logger.experiment.log(
+                {
+                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): wandb.Image(f"{tmp_file.name}.jpg"), 
+                    'epoch': trainer.current_epoch
+                }
+            )
 
         plt.close()
