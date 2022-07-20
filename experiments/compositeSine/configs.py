@@ -21,8 +21,8 @@ configs_architecture = {
     'hidden_bottleneck_activation': 'Identity', 
     'hidden_layer_activation': 'ReLU', 
     # for abcMLP
-    'list_a': [-.5] + [0 for i in range(4)] + [.5], # default: mup
-    'list_b': [.5 for i in range(6)], # default: mup
+    'list_a': [[-.5] + [0 for i in range(4)] + [.5]], # default: mup
+    'list_b': [[.5 for i in range(6)]], # default: mup
     # 'list_a': [[0] + [0.5 for i in range(5)]], 
     # 'list_b': [[0 for i in range(6)]], 
     'c': 0, 
