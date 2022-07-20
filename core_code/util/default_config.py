@@ -107,8 +107,8 @@ def init_config_trainer(**kwargs):
         'fast_dev_run': False,
         # 'precision'
         'enable_progress_bar': False,
-        'max_epochs': 1024,
-        'max_time': '00:05:55:00' # 00:12:00:00 - 12 hours
+        'max_epochs': 5,
+        'max_time': '00:08:00:00' # 00:12:00:00 - 12 hours
     }
 
     return _make_init_config(default_extraction_strings, **kwargs)[0]

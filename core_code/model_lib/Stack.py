@@ -8,14 +8,13 @@ from core_code.util.default_config import init_config_Stack
 
 class Stack_Core(torch.nn.Module):
 
-    def __init__(self, input_width, output_width, variable_width, hidden_bottleneck_activation, hidden_layer_activation, skip_conn, linear_skip_conn, linear_skip_conn_width):
+    def __init__(self, input_width, output_width, variable_width, hidden_layer_activation, skip_conn, linear_skip_conn, linear_skip_conn_width):
         
         super().__init__()
 
         self.input_width = input_width
         self.output_width = output_width
         self.variable_width = variable_width
-        self.hidden_bottleneck_activation = hidden_bottleneck_activation
         self.hidden_layer_activation = hidden_layer_activation
         
 
@@ -84,17 +83,20 @@ class NNModel(torch.nn.Module):
         mod_list = []
         depth = self.config_architecture['depth']
 
+        standard_input_wo_dim = [
+            self.config_architecture['variable_width'],
+            self.config_architecture['hidden_layer_activation'],
+            self.config_architecture['skip_conn'],
+            self.config_architecture['linear_skip_conn'],
+            self.config_architecture['linear_skip_conn_width']
+        ]
+
         for i in range(depth):
             if depth == 1:
                 mod_list.append(Stack_Core(
                             self.config_architecture['d_in'], 
                             self.config_architecture['d_out'],
-                            self.config_architecture['variable_width'],
-                            self.config_architecture['hidden_bottleneck_activation'],
-                            self.config_architecture['hidden_layer_activation'],
-                            self.config_architecture['skip_conn'],
-                            self.config_architecture['linear_skip_conn'],
-                            self.config_architecture['linear_skip_conn_width']
+                            *standard_input_wo_dim
                         )
                     )
             else:
@@ -102,36 +104,21 @@ class NNModel(torch.nn.Module):
                     mod_list.append(Stack_Core(
                             self.config_architecture['d_in'], 
                             self.config_architecture['bottleneck_width'],
-                            self.config_architecture['variable_width'],
-                            self.config_architecture['hidden_bottleneck_activation'],
-                            self.config_architecture['hidden_layer_activation'],
-                            self.config_architecture['skip_conn'],
-                            self.config_architecture['linear_skip_conn'],
-                            self.config_architecture['linear_skip_conn_width']
+                            *standard_input_wo_dim
                         )
                     )
                 elif i < depth - 1:
                     mod_list.append(Stack_Core(
                             self.config_architecture['bottleneck_width'], 
                             self.config_architecture['bottleneck_width'],
-                            self.config_architecture['variable_width'],
-                            self.config_architecture['hidden_bottleneck_activation'],
-                            self.config_architecture['hidden_layer_activation'],
-                            self.config_architecture['skip_conn'],
-                            self.config_architecture['linear_skip_conn'],
-                            self.config_architecture['linear_skip_conn_width']
+                            *standard_input_wo_dim
                         )
                     )
                 else:
                     mod_list.append(Stack_Core(
                             self.config_architecture['bottleneck_width'], 
                             self.config_architecture['d_out'],
-                            self.config_architecture['variable_width'],
-                            self.config_architecture['hidden_bottleneck_activation'],
-                            self.config_architecture['hidden_layer_activation'],
-                            self.config_architecture['skip_conn'],
-                            self.config_architecture['linear_skip_conn'],
-                            self.config_architecture['linear_skip_conn_width']
+                            *standard_input_wo_dim
                         )
                     )
 

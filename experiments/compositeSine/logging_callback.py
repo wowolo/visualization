@@ -29,7 +29,7 @@ class LoggingCallback(Callback):
         y_train,
         task_activity_train,
         config_data: dict = {},
-        logging_epoch_interval: int = 50,
+        logging_epoch_interval: int = 5,
     ):
         super().__init__()
         self.x_train = x_train.cpu()
@@ -136,7 +136,7 @@ class LoggingCallback(Callback):
         
         trainer.logger.experiment.log({'validation/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
         
-        if trainer.current_epoch % self.logging_epoch_interval == 0: # plot the images based on self.state_val['batch_val_data']
+        if (trainer.current_epoch % self.logging_epoch_interval == 0) or (trainer.current_epoch == (trainer.max_epochs-1)): # plot the images based on the states collected over the epoch
             
             del self.state_val['data_len']
             self.state_val = {key: torch.concat(self.state_val[key]).cpu() for key in self.state_val.keys()}
@@ -212,7 +212,7 @@ class LoggingCallback(Callback):
         trainer.logger.experiment.log({'validation/plot_task{}_dim{}'.format(task_num, d): plt, 'epoch': trainer.current_epoch})
         # log the plots - jpg
         with io.BytesIO() as buf:
-            
+
             plt.savefig(buf, format='jpg')
 
             tmp_file = tempfile.NamedTemporaryFile() 
