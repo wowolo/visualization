@@ -65,11 +65,10 @@ err="${tag}_error.txt"
 module load gcc/8.2.0 python_gpu/3.9.9 eth_proxy
 source $project_path/$python_env/bin/activate
 
+# compute the number of configs that will be handled separately by a job array
 python $project_path/pre_main.py
 num_configs=$?
-
 tag=$tag'[1-'$num_configs']'
-echo tag
 
 # submit the job
 bsub -G ls_math -J $tag -o $log -e $err -n $n_core -W $max_time -N -R "rusage[mem=$memory, ngpus_excl_p=$n_gpus]" python $project_path/main.py --experimentbatch_name $tag --config_trainer ${config_trainer[@]} --num_config \$LSB_JOBINDEX
