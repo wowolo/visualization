@@ -1,7 +1,8 @@
 # handle all the logging via one callback class
 from typing import Sequence
 import io
-import numpy as np
+import tempfile
+import os
 
 import torch
 from pytorch_lightning import Callback, Trainer, LightningModule
@@ -209,17 +210,32 @@ class LoggingCallback(Callback):
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
         # log the plots - jpg
-        io_buf = io.BytesIO()
-        fig.savefig(io_buf, format='png')
-        io_buf.seek(0)
-        tmp_img = plt.imread(io_buf)
-        io_buf.close()
+        os.environ["TMPDIR"] = os.getcwd()
 
-        wandb.log(
-            {
-                'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
-                'epoch': trainer.current_epoch
-            }
-        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            filename = tmp_dir + 'tmp.jpg'
+            fig.savefig(filename)
+            tmp_img = plt.imread(filename)
+
+            wandb.log(
+                {
+                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
+                    'epoch': trainer.current_epoch
+                }
+            )
+
+        # io_buf = io.BytesIO()
+        # fig.savefig(io_buf, format='png')
+        # io_buf.seek(0)
+        # tmp_img = plt.imread(io_buf)
+        # io_buf.close()
+
+        # wandb.log(
+        #     {
+        #         'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
+        #         'epoch': trainer.current_epoch
+        #     }
+        # )
 
         plt.close(fig)
