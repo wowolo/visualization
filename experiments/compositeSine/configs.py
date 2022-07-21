@@ -66,5 +66,5 @@ configs_custom = {
     'callbacks': True,
     'seed': 77,
     'workers': True,
-    'logging_epoch_interval': 2
+    'logging_epoch_interval': 2 # >= 2
 }
