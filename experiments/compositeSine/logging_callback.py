@@ -210,11 +210,11 @@ class LoggingCallback(Callback):
         plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, ncol=3)
         
         # log the plots - jpg
-        os.environ["TMPDIR"] = os.getcwd()
+        # os.environ["TMPDIR"] = os.getcwd()
 
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            filename = tmp_dir + 'tmp.jpg'
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as tmp_dir:
+            filename = tmp_dir + '/' + 'tmp.jpg'
             fig.savefig(filename)
             tmp_img = plt.imread(filename)
 
