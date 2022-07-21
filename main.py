@@ -61,8 +61,6 @@ parser.add_argument('--num_config', type=int)
 def main():
 
     args = parser.parse_args()
-
-    print(args) ############temp
     
     experimentbatch_name = args.experimentbatch_name
     if isinstance(experimentbatch_name, type(None)):
@@ -73,6 +71,7 @@ def main():
         config_trainer = {}
 
     num_config = args.num_config
+    print(num_config) ############temp
     if isinstance(num_config, type(None)):
         num_config = 1
     num_config -= 1
