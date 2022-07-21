@@ -137,22 +137,23 @@ class LoggingCallback(Callback):
         
         trainer.logger.experiment.log({'validation/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
         
-        if (trainer.current_epoch % self.logging_epoch_interval == 1) or (trainer.current_epoch == (trainer.max_epochs-1)): # plot the images based on the states collected over the epoch
-            
-            del self.state_val['data_len']
-            self.state_val = {key: torch.concat(self.state_val[key]).cpu() for key in self.state_val.keys()}
+        if trainer.global_rank == 0:
+            if (trainer.current_epoch % self.logging_epoch_interval == 1) or (trainer.current_epoch == (trainer.max_epochs-1)): # plot the images based on the states collected over the epoch
+                
+                del self.state_val['data_len']
+                self.state_val = {key: torch.concat(self.state_val[key]).cpu() for key in self.state_val.keys()}
 
-            # determine the plots we want to log and log them with self._log_plot
-            unique_activities = torch.unique(self.state_val['task_activity']).int()
-            for task_num in unique_activities:
-                task_num = int(task_num)
-                active_dimensions = util.extract_taskconfig(pl_module.config_training, task_num)['criterion'][1]
-                for d in active_dimensions:
-                    self._log_plot(
-                        trainer,
-                        task_num,
-                        d,
-                    )
+                # determine the plots we want to log and log them with self._log_plot
+                unique_activities = torch.unique(self.state_val['task_activity']).int()
+                for task_num in unique_activities:
+                    task_num = int(task_num)
+                    active_dimensions = util.extract_taskconfig(pl_module.config_training, task_num)['criterion'][1]
+                    for d in active_dimensions:
+                        self._log_plot(
+                            trainer,
+                            task_num,
+                            d,
+                        )
 
         self.state_val = self._empty_state() # important to keep emptying the chached data in state_val when not needed!
 
