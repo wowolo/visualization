@@ -11,7 +11,7 @@ config_function = {
 # configs for model architecture
 configs_architecture = {
     'architecture_key': 'abcMLP',
-    'depth': [6, 4],
+    'depth': 6,
     'width': 4096, 
     'bottleneck_width': 256, # for Stack
     'variable_width': 4096, # for Stack
@@ -49,7 +49,7 @@ configs_data.update(config_function)
 configs_training = {
     'batch_size': 64, 
     'data_task_batching': True,
-    'learning_rate': 0.005,
+    'learning_rate': [0.05, 0.01, 0.005, 0.0001],
     'update_rule': 'SGD',
     'regularization_alpha': 0.00,
     'regularization_ord': 2,
@@ -66,5 +66,5 @@ configs_custom = {
     'callbacks': True,
     'seed': 77,
     'workers': True,
-    'logging_epoch_interval': 2 # >= 2
+    'logging_epoch_interval': 50 # >= 2
 }
