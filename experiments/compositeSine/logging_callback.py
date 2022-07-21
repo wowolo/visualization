@@ -213,17 +213,17 @@ class LoggingCallback(Callback):
         # os.environ["TMPDIR"] = os.getcwd()
 
 
-        # with tempfile.TemporaryDirectory(dir=os.getcwd()) as tmp_dir:
-        #     filename = tmp_dir + '/' + 'tmp.jpg'
-        #     fig.savefig(filename)
-        #     tmp_img = plt.imread(filename)
+        with tempfile.TemporaryDirectory(dir=os.getcwd()) as tmp_dir:
+            filename = tmp_dir + '/' + 'tmp.jpg'
+            fig.savefig(filename)
+            tmp_img = plt.imread(filename)
 
-        #     wandb.log(
-        #         {
-        #             'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
-        #             'epoch': trainer.current_epoch
-        #         }
-        #     )
+            wandb.log(
+                {
+                    'validation/plot_task{}_dim{}_jpg'.format(task_num, d): [wandb.Image(tmp_img)], 
+                    'epoch': trainer.current_epoch
+                }
+            )
 
         # io_buf = io.BytesIO()
         # fig.savefig(io_buf, format='png')
