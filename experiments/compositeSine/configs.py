@@ -10,8 +10,8 @@ config_function = {
 
 # configs for model architecture
 configs_architecture = {
-    'architecture_key': 'Stack',
-    'depth': 3,
+    'architecture_key': 'abcMLP',
+    'depth': 6,
     'width': 4096, 
     'bottleneck_width': 256, # for Stack
     'variable_width': 4096, # for Stack
@@ -49,9 +49,9 @@ configs_data.update(config_function)
 configs_training = {
     'batch_size': 64, 
     'data_task_batching': True,
-    'learning_rate': [0.005, 0.0005, 0.0001],
+    'learning_rate': [0.01, 0.005, 0.001],
     'update_rule': 'SGD',
-    'regularization_alpha': [0.5, 0.1, 0.05],
+    'regularization_alpha': 0,
     'regularization_ord': 2,
     #### (potentially) task specific ####
     'criterion': {'task_0': ('dimred_MSELoss', [0]), 'task_1': ('dimred_MSELoss', list(np.arange(1, 7)))}, 
