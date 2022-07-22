@@ -63,7 +63,6 @@ def main():
     args = parser.parse_args()
     
     num_config = args.num_config
-    print(num_config) ############temp
     if isinstance(num_config, type(None)):
         num_config = 1
     num_config -= 1
