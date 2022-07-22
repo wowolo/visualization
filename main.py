@@ -54,7 +54,7 @@ class StoreDict(argparse.Action):
 parser = argparse.ArgumentParser()
 parser.add_argument('--num_config', type=int)
 parser.add_argument('--experimentbatch_name', type=str)
-parser.add_argument('--config_trainer', action=StoreDict)
+parser.add_argument('--config_trainer', action=StoreDict, nargs='*')
 
 
 
@@ -67,7 +67,7 @@ def main():
     if isinstance(num_config, type(None)):
         num_config = 1
     num_config -= 1
-
+    
     experimentbatch_name = args.experimentbatch_name
     if isinstance(experimentbatch_name, type(None)):
         experimentbatch_name = 'default_name'
