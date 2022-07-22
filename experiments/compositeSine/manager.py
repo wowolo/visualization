@@ -1,6 +1,4 @@
-import wandb
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 
 from experiments.compositeSine.logging_callback import LoggingCallback 
 
@@ -96,6 +94,8 @@ class Manager(BasicManager):
                 data_module,
                 project="visualization", 
                 name=experimentbatch_name + f'_config{i}',
-                callbacks=[logging_callback],
+                callbacks=[
+                    logging_callback,
+                ],
                 **config_trainer
             )

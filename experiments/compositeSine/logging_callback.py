@@ -1,9 +1,9 @@
 # handle all the logging via one callback class
 from typing import Sequence
-import io
 import tempfile
 import os
 
+import numpy as np
 import torch
 from pytorch_lightning import Callback, Trainer, LightningModule
 import wandb
@@ -121,6 +121,9 @@ class LoggingCallback(Callback):
         epoch_loss = torch.sum(torch.Tensor([self.state_train['loss'][i] * data_len[i] for i in range(len(data_len))])) / torch.sum(torch.Tensor(data_len))
         
         trainer.logger.experiment.log({'train/loss': epoch_loss, 'epoch': trainer.current_epoch, 'global_step': trainer.global_step})
+
+        if torch.isnan(epoch_loss):
+            trainer.should_stop = True
 
         self.state_train = self._empty_state()
 
